@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#dbe0e5",
+                        "on-tertiary-fixed": "#2b1700",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f4f3f7",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#dad9dd",
+                        "primary": "#002045",
+                        "on-surface": "#1a1c1e",
+                        "on-primary-fixed": "#001b3c",
+                        "surface-container-highest": "#e3e2e6",
+                        "secondary-fixed-dim": "#c2c7cc",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#43474e",
+                        "primary-fixed": "#d6e3ff",
+                        "inverse-on-surface": "#f1f0f4",
+                        "surface-tint": "#455f88",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#2d476f",
+                        "inverse-surface": "#2f3033",
+                        "tertiary-fixed": "#ffddba",
+                        "on-secondary-container": "#5e6368",
+                        "on-primary-container": "#86a0cd",
+                        "tertiary-fixed-dim": "#f2bc82",
+                        "surface-variant": "#e3e2e6",
+                        "outline": "#74777f",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#faf9fd",
+                        "outline-variant": "#c4c6cf",
+                        "surface-container": "#efedf1",
+                        "secondary-fixed": "#dee3e8",
+                        "background": "#faf9fd",
+                        "secondary": "#595f63",
+                        "on-secondary-fixed": "#171c20",
+                        "inverse-primary": "#adc7f7",
+                        "on-tertiary-container": "#c6955e",
+                        "surface-container-high": "#e9e7eb",
+                        "on-secondary-fixed-variant": "#42474c",
+                        "tertiary": "#321b00",
+                        "on-background": "#1a1c1e",
+                        "tertiary-container": "#4f2e00",
+                        "primary-fixed-dim": "#adc7f7",
+                        "on-tertiary-fixed-variant": "#633f0f",
+                        "surface": "#faf9fd",
+                        "on-error": "#ffffff",
+                        "primary-container": "#1a365d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "container-padding": "24px",
+                        "xs": "8px",
+                        "base": "4px",
+                        "sm": "12px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "body-md": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "h1": ["Inter"],
+                        "h2": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "h3": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "h2": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .graph-line {
+            stroke: #E2E8F0;
+            stroke-width: 1.5;
+            stroke-dasharray: 4;
+        }
+        .toxicity-accent { border-left: 4px solid #F6AD55; background-color: #FFFAF0; }
+        .chemistry-accent { border-left: 4px solid #455f88; background-color: #f0f4ff; }
+        .environment-accent { border-left: 4px solid #48bb78; background-color: #f0fff4; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-20">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md fixed top-0 left-0 w-full flex justify-between items-center px-4 h-16 border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm z-40">
+<div class="flex items-center gap-4">
+<button class="text-blue-900 dark:text-blue-400 active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="text-blue-900 dark:text-blue-100 font-bold text-xl">砗智答</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 px-4 md:px-lg max-w-7xl mx-auto">
+<!-- Search and Title Section -->
+<div class="mb-lg flex flex-col md:flex-row md:items-center justify-between gap-md">
+<div>
+<h2 class="font-h1 text-h1 text-primary">砷相关概念图谱</h2>
+<p class="text-on-surface-variant font-body-sm mt-1">深度解析砷元素的化学特性、环境影响及毒理学机制</p>
+</div>
+<div class="relative w-full md:w-80">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-secondary-container border-none rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition-all text-body-md outline-none" placeholder="搜索化学式、毒性或节点..." type="text"/>
+</div>
+</div>
+<!-- Legend -->
+<div class="flex flex-wrap gap-md mb-md bg-white p-sm rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">化学特性</span>
+</div>
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 rounded-full bg-[#DD6B20]"></div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">毒性机制</span>
+</div>
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 rounded-full bg-emerald-600"></div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">环境影响</span>
+</div>
+</div>
+<!-- Knowledge Graph Visualization Area (Asymmetric Bento) -->
+<div class="grid grid-cols-12 gap-md h-[500px] md:h-[600px]">
+<!-- Main Graph Area -->
+<div class="col-span-12 lg:col-span-8 bg-white rounded-xl border border-outline-variant/30 relative overflow-hidden shadow-sm group">
+<div class="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px]"></div>
+<!-- Simulated Nodes and Lines -->
+<svg class="absolute inset-0 w-full h-full">
+<line class="graph-line" x1="50%" x2="30%" y1="50%" y2="30%"></line>
+<line class="graph-line" x1="50%" x2="70%" y1="50%" y2="35%"></line>
+<line class="graph-line" x1="50%" x2="55%" y1="50%" y2="75%"></line>
+<line class="graph-line" x1="30%" x2="20%" y1="30%" y2="60%"></line>
+<line class="graph-line" x1="70%" x2="85%" y1="35%" y2="60%"></line>
+</svg>
+<!-- Center Node -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group">
+<div class="w-24 h-24 rounded-full bg-primary flex flex-col items-center justify-center text-white shadow-lg cursor-pointer hover:scale-110 transition-transform z-10">
+<span class="text-h3 font-h3">As</span>
+<span class="text-[10px] font-medium">砷元素</span>
+</div>
+</div>
+<!-- Peripheral Nodes -->
+<div class="absolute top-[25%] left-[25%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-[#DD6B20] text-white shadow-md cursor-pointer hover:ring-4 hover:ring-[#DD6B20]/20 transition-all">
+<span class="text-body-sm font-semibold">急性毒性</span>
+</div>
+</div>
+<div class="absolute top-[30%] left-[75%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-emerald-600 text-white shadow-md cursor-pointer hover:ring-4 hover:ring-emerald-600/20 transition-all">
+<span class="text-body-sm font-semibold">地下水污染</span>
+</div>
+</div>
+<div class="absolute bottom-[20%] left-[55%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-primary text-white shadow-md cursor-pointer hover:ring-4 hover:ring-primary/20 transition-all">
+<span class="text-body-sm font-semibold">三氧化二砷</span>
+</div>
+</div>
+<div class="absolute top-[60%] left-[15%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-[#DD6B20] text-white shadow-md cursor-pointer hover:ring-4 hover:ring-[#DD6B20]/20 transition-all">
+<span class="text-body-sm font-semibold">致癌性</span>
+</div>
+</div>
+<div class="absolute top-[60%] left-[88%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-emerald-600 text-white shadow-md cursor-pointer hover:ring-4 hover:ring-emerald-600/20 transition-all">
+<span class="text-body-sm font-semibold">生物富集</span>
+</div>
+</div>
+<!-- Floating Interaction Tooltip (Simulated Secondary Page Trigger) -->
+<div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur p-md rounded-xl border border-outline-variant shadow-xl max-w-[240px]">
+<div class="flex items-start gap-sm mb-xs">
+<span class="material-symbols-outlined text-[#DD6B20]">warning</span>
+<h4 class="font-h3 text-h3 text-primary">急性毒性</h4>
+</div>
+<p class="text-body-sm text-on-surface-variant mb-md">砷通过抑制丙酮酸脱氢酶复合物，干扰细胞呼吸，导致多器官衰竭。</p>
+<button class="w-full py-2 bg-primary text-white rounded-lg text-body-sm font-semibold hover:opacity-90 transition-opacity">查看完整报告</button>
+</div>
+</div>
+<!-- Side Info Panel -->
+<div class="hidden lg:flex lg:col-span-4 flex-col gap-md">
+<div class="bg-white rounded-xl border border-outline-variant/30 p-md shadow-sm">
+<h3 class="font-h2 text-h2 text-primary mb-sm">节点统计</h3>
+<div class="space-y-sm">
+<div class="flex justify-between items-center p-xs bg-surface-container-low rounded-lg">
+<span class="text-body-md text-on-surface-variant">核心节点</span>
+<span class="font-bold text-primary">24</span>
+</div>
+<div class="flex justify-between items-center p-xs bg-surface-container-low rounded-lg">
+<span class="text-body-md text-on-surface-variant">关联链路</span>
+<span class="font-bold text-primary">156</span>
+</div>
+<div class="flex justify-between items-center p-xs bg-surface-container-low rounded-lg">
+<span class="text-body-md text-on-surface-variant">更新时间</span>
+<span class="text-body-sm text-outline">2023-11-20</span>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-xl border border-outline-variant/30 p-md shadow-sm flex-1">
+<h3 class="font-h2 text-h2 text-primary mb-sm">关键路径分析</h3>
+<div class="space-y-md">
+<div class="toxicity-accent p-sm rounded-r-lg">
+<div class="text-label-caps font-label-caps text-[#DD6B20] mb-1">毒性预警</div>
+<div class="text-body-md font-semibold text-primary">As³⁺ 与蛋白质巯基结合</div>
+</div>
+<div class="chemistry-accent p-sm rounded-r-lg">
+<div class="text-label-caps font-label-caps text-surface-tint mb-1">化学反应</div>
+<div class="text-body-md font-semibold text-primary">甲基化代谢路径</div>
+</div>
+<div class="environment-accent p-sm rounded-r-lg">
+<div class="text-label-caps font-label-caps text-emerald-600 mb-1">环境治理</div>
+<div class="text-body-md font-semibold text-primary">铁锰氧化物吸附技术</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detail Modal (Overlay Logic Display) -->
+<div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" id="detail-modal">
+<div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden">
+<div class="p-lg border-b border-outline-variant/30 flex justify-between items-center">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-error" data-weight="fill">warning</span>
+</div>
+<div>
+<h2 class="font-h1 text-h1 text-primary">急性毒性机制</h2>
+<p class="text-body-sm text-outline">毒理学分类：极高风险</p>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full hover:bg-surface-container flex items-center justify-center text-outline transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-lg grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-sm uppercase">机理描述</h4>
+<p class="text-body-md text-on-surface">砷与体内的酶系统，特别是含巯基（-SH）的酶结合，抑制其活性，导致碳水化合物代谢受阻。</p>
+<div class="mt-md p-md bg-[#FFFAF0] rounded-xl border-l-4 border-[#DD6B20]">
+<span class="text-body-sm font-bold text-[#DD6B20]">实验室注意事项：</span>
+<p class="text-body-sm text-on-tertiary-fixed mt-1">处理无机砷化物需在通风橱内操作，并佩戴全套防护装备。</p>
+</div>
+</div>
+<div class="rounded-xl overflow-hidden border border-outline-variant/30">
+<img class="w-full h-48 object-cover" data-alt="Microscopic view of cellular structure under stress with colorful chemical staining and high technical detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOB7m4bexLya9pP_x4OMV794bh6FiddiXBPfCt_0PhPo1FpGaDotzkQdplzTRhQF9MKl5WDapHW0h9D3Cr22X8et9DyzkouKEttRYABeKfCeBqfcxtEE5YqP7lji7Tqax_XzPgKiNwk2l_ZxUGnfWhDtBMWCCTfn_bxD3L6e2WlQzRjUVDppcyrtQmL8HVkvJY1PFx6-O931GD5PZgmXMqUrN538x9VoAsi3WZXzR-ebg7lSJIcwsx-oVcVUbAN0U64pJsmAaPlKBz"/>
+<div class="p-sm bg-surface-container-low text-[10px] text-outline text-center">
+                            图：砷暴露下的细胞形态学改变模拟
+                        </div>
+</div>
+</div>
+<div class="px-lg pb-lg flex justify-end gap-md">
+<button class="px-md py-2 border border-outline text-primary rounded-lg text-body-sm font-semibold hover:bg-surface-container transition-colors">下载文献</button>
+<button class="px-md py-2 bg-primary text-white rounded-lg text-body-sm font-semibold shadow-md active:scale-95 transition-all">追踪关联路径</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-20 bg-white dark:bg-slate-950 flex justify-around items-center pb-safe px-2 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_rgba(26,54,93,0.05)] z-50">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[11px] font-medium tracking-wide">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">library_books</span>
+<span class="text-[11px] font-medium tracking-wide">知识库</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-900 dark:text-blue-300 font-bold scale-105 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+<span class="text-[11px] font-medium tracking-wide">知识图谱</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[11px] font-medium tracking-wide">个人中心</span>
+</a>
+</nav>
+</body></html>

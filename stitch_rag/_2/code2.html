@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#dbe0e5",
+                        "on-tertiary-fixed": "#2b1700",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f4f3f7",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#dad9dd",
+                        "primary": "#002045",
+                        "on-surface": "#1a1c1e",
+                        "on-primary-fixed": "#001b3c",
+                        "surface-container-highest": "#e3e2e6",
+                        "secondary-fixed-dim": "#c2c7cc",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#43474e",
+                        "primary-fixed": "#d6e3ff",
+                        "inverse-on-surface": "#f1f0f4",
+                        "surface-tint": "#455f88",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#2d476f",
+                        "inverse-surface": "#2f3033",
+                        "tertiary-fixed": "#ffddba",
+                        "on-secondary-container": "#5e6368",
+                        "on-primary-container": "#86a0cd",
+                        "tertiary-fixed-dim": "#f2bc82",
+                        "surface-variant": "#e3e2e6",
+                        "outline": "#74777f",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#faf9fd",
+                        "outline-variant": "#c4c6cf",
+                        "surface-container": "#efedf1",
+                        "secondary-fixed": "#dee3e8",
+                        "background": "#faf9fd",
+                        "secondary": "#595f63",
+                        "on-secondary-fixed": "#171c20",
+                        "inverse-primary": "#adc7f7",
+                        "on-tertiary-container": "#c6955e",
+                        "surface-container-high": "#e9e7eb",
+                        "on-secondary-fixed-variant": "#42474c",
+                        "tertiary": "#321b00",
+                        "on-background": "#1a1c1e",
+                        "tertiary-container": "#4f2e00",
+                        "primary-fixed-dim": "#adc7f7",
+                        "on-tertiary-fixed-variant": "#633f0f",
+                        "surface": "#faf9fd",
+                        "on-error": "#ffffff",
+                        "primary-container": "#1a365d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "container-padding": "24px",
+                        "xs": "8px",
+                        "base": "4px",
+                        "sm": "12px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "body-md": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "h1": ["Inter"],
+                        "h2": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "h3": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "h2": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .sidebar-mask {
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md overflow-hidden">
+<!-- Top Navigation -->
+<nav class="fixed top-0 left-0 w-full flex justify-between items-center px-4 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm z-40">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-full active:opacity-70">
+<span class="material-symbols-outlined text-blue-900 dark:text-blue-400">menu</span>
+</button>
+</div>
+<div class="font-sans font-semibold tracking-tight text-lg text-blue-900 dark:text-blue-100 font-bold text-xl">砷智答</div>
+<div class="flex items-center">
+<button class="p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-full active:opacity-70">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400">delete_sweep</span>
+</button>
+</div>
+</nav>
+<!-- Sidebar / Drawer -->
+<div class="fixed inset-0 z-50 sidebar-mask transition-opacity duration-300">
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-slate-50 dark:bg-slate-900 shadow-2xl flex flex-col py-4 rounded-r-2xl border-r border-slate-200/50 dark:border-slate-800/50">
+<div class="flex justify-between items-center px-6 py-4">
+<span class="text-blue-950 dark:text-white font-bold text-lg">历史记录</span>
+<button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto px-2 space-y-6">
+<!-- Group: Today -->
+<div>
+<h4 class="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-widest">今天</h4>
+<div class="space-y-1">
+<div class="group relative flex items-center p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-300 border-r-4 border-blue-900 cursor-pointer hover:pl-4 transition-all duration-300">
+<span class="material-symbols-outlined mr-3 text-sm">science</span>
+<span class="truncate font-medium text-sm">关于砷元素的定性分析</span>
+</div>
+<div class="group relative flex items-center p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer hover:pl-4 transition-all duration-300">
+<span class="material-symbols-outlined mr-3 text-sm">forum</span>
+<span class="truncate font-medium text-sm">化合物合成路径研究</span>
+</div>
+</div>
+</div>
+<!-- Group: Past Week -->
+<div>
+<h4 class="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-widest">最近 7 天</h4>
+<div class="space-y-1">
+<div class="group relative flex items-center p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer hover:pl-4 transition-all duration-300">
+<span class="material-symbols-outlined mr-3 text-sm">analytics</span>
+<span class="truncate font-medium text-sm">实验数据统计 2023-11</span>
+</div>
+<div class="group relative flex items-center p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer hover:pl-4 transition-all duration-300">
+<span class="material-symbols-outlined mr-3 text-sm">security</span>
+<span class="truncate font-medium text-sm">实验室安全规程</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto px-4 pt-4 border-t border-slate-200/50 dark:border-slate-800/50">
+<button class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-error font-semibold hover:bg-error-container/50 transition-colors">
+<span class="material-symbols-outlined">delete</span>
+<span class="text-sm">清空所有历史</span>
+</button>
+</div>
+</aside>
+</div>
+<!-- Main Chat Area -->
+<main class="h-screen pt-16 pb-32 overflow-y-auto px-4 md:px-lg max-w-4xl mx-auto space-y-8">
+<!-- Welcome Message -->
+<div class="flex flex-col items-center justify-center py-12 space-y-4">
+<div class="w-16 h-16 bg-primary-container rounded-2xl flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-3xl text-on-primary-container">psychology</span>
+</div>
+<h1 class="font-h1 text-h1 text-primary text-center">您好，我是砷智答助手</h1>
+<p class="text-on-surface-variant text-center max-w-md">很高兴为您提供高精度的科研分析服务，您可以向我询问任何学术或实验相关的问题。</p>
+</div>
+<!-- Conversation Bubbles -->
+<div class="space-y-lg">
+<!-- User Message -->
+<div class="flex justify-end">
+<div class="max-w-[85%] bg-primary text-on-primary p-4 rounded-2xl rounded-tr-none shadow-sm font-body-md">
+                    我想了解一下三氧化二砷在现代医学中的具体应用场景及其药理机制。
+                </div>
+</div>
+<!-- Assistant Message -->
+<div class="flex justify-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center flex-shrink-0 mt-1 border border-slate-200">
+<span class="material-symbols-outlined text-primary text-sm">model_training</span>
+</div>
+<div class="max-w-[90%] space-y-4">
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700 shadow-sm">
+<p class="font-body-md text-on-surface leading-relaxed">
+                            三氧化二砷 (As₂O₃)，俗称砒霜，在现代血液病学中具有显著地位。其主要应用场景及机制如下：
+                        </p>
+<ul class="list-disc ml-4 mt-2 space-y-2 font-body-sm text-on-surface-variant">
+<li><strong>治疗急性早幼粒细胞白血病 (APL)：</strong> 与全反式维甲酸 (ATRA) 联用，已成为一线标准疗法。</li>
+<li><strong>药理机制：</strong> 通过诱导 PML-RARα 融合蛋白的降解，促进白血病细胞的凋亡和分化。</li>
+<li><strong>实体瘤探索：</strong> 目前也在肝癌、淋巴瘤等领域进行临床研究。</li>
+</ul>
+<!-- Sources -->
+<div class="mt-4 pt-4 border-t border-slate-50 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase mb-2">参考来源</p>
+<div class="flex flex-wrap gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded-md text-[11px] flex items-center gap-1 cursor-pointer hover:bg-slate-300">
+<span class="material-symbols-outlined text-[14px]">link</span>
+                                    《中国血液病诊疗指南 2023》
+                                </span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded-md text-[11px] flex items-center gap-1 cursor-pointer hover:bg-slate-300">
+<span class="material-symbols-outlined text-[14px]">link</span>
+                                    Nature Reviews Drug Discovery
+                                </span>
+</div>
+</div>
+<!-- Feedback Actions -->
+<div class="mt-4 flex gap-2">
+<button class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+<span class="material-symbols-outlined text-[18px]">thumb_up</span>
+</button>
+<button class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-red-600 transition-colors">
+<span class="material-symbols-outlined text-[18px]">thumb_down</span>
+</button>
+<button class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Input Section -->
+<div class="fixed bottom-0 left-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl z-30 pb-safe">
+<div class="max-w-4xl mx-auto p-4 space-y-4">
+<!-- Recommendations -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap py-1">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-sm">tips_and_updates</span>
+<button class="px-4 py-2 bg-surface-container-low hover:bg-surface-container text-on-surface-variant text-xs rounded-full border border-slate-200 transition-colors">砷含量的原子荧光测定法步骤</button>
+<button class="px-4 py-2 bg-surface-container-low hover:bg-surface-container text-on-surface-variant text-xs rounded-full border border-slate-200 transition-colors">实验室废水除砷工艺比较</button>
+<button class="px-4 py-2 bg-surface-container-low hover:bg-surface-container text-on-surface-variant text-xs rounded-full border border-slate-200 transition-colors">砷污染对土壤生态的长期影响</button>
+</div>
+<!-- Input Box -->
+<div class="relative group">
+<div class="absolute inset-0 bg-primary/5 rounded-[20px] blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+<div class="relative flex items-end gap-2 bg-surface-container-low rounded-[20px] p-2 border border-slate-200/60 focus-within:border-primary/30 transition-all duration-300">
+<button class="p-3 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">library_books</span>
+</button>
+<textarea class="flex-1 bg-transparent border-none focus:ring-0 py-3 text-on-surface font-body-md resize-none max-h-32" placeholder="输入您的问题，如：砷的化学性质..." rows="1"></textarea>
+<button class="m-1 p-3 bg-primary text-on-primary rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<p class="text-center text-[10px] text-slate-400 pb-2">AI 助手可能会生成不准确的信息，请务必核实重要的实验数据。</p>
+</div>
+</div>
+<!-- Bottom Nav (Shared Component Logic) -->
+<nav class="fixed bottom-0 left-0 w-full h-20 bg-white dark:bg-slate-950 flex justify-around items-center pb-safe px-2 z-50 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_rgba(26,54,93,0.05)] md:hidden">
+<div class="flex flex-col items-center justify-center text-blue-900 dark:text-blue-300 font-bold scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[11px] font-medium tracking-wide">首页</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">library_books</span>
+<span class="text-[11px] font-medium tracking-wide">知识库</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-[11px] font-medium tracking-wide">知识图谱</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[11px] font-medium tracking-wide">个人中心</span>
+</div>
+</nav>
+</body></html>

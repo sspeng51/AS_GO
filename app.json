@@ -1,0 +1,39 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/login",
+    "pages/knowledge/knowledge",
+    "pages/graph/graph",
+    "pages/profile/profile",
+    "pages/agreement/agreement",
+    "pages/privacy/privacy"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "砷智答",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#faf9fd",
+    "enablePullDownRefresh": false
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "networkTimeout": {
+    "request": 30000,
+    "uploadFile": 60000,
+    "downloadFile": 60000,
+    "connectSocket": 15000
+  },
+  "permission": {
+    "scope.record": {
+      "desc": "用于语音输入功能，将语音转为文字进行提问"
+    },
+    "scope.album": {
+      "desc": "用于上传图片附件辅助提问"
+    },
+    "scope.camera": {
+      "desc": "用于拍摄照片辅助提问"
+    }
+  }
+}

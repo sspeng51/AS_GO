@@ -1,0 +1,323 @@
+<view class="page-container {{darkMode ? 'dark-theme' : ''}}">
+  
+  <view class="background-decoration">
+    <view class="decoration-circle decoration-1"></view>
+    <view class="decoration-circle decoration-2"></view>
+  </view>
+
+  <!-- 侧边栏遮罩与侧边栏 -->
+  <view class="sidebar-mask" wx:if="{{showSidebar}}" bindtap="closeSidebar">
+    <view class="sidebar" catchtap="stopPropagation">
+      <view class="sidebar-header">
+        <text class="sidebar-title">历史记录</text>
+        <view class="close-btn" bindtap="closeSidebar">
+          <text class="close-icon">✕</text>
+        </view>
+      </view>
+
+      <view class="new-chat-btn" bindtap="createNewChat">
+        <text class="plus-icon">+</text>
+        <text>新建对话</text>
+      </view>
+
+      <scroll-view class="sidebar-content" scroll-y>
+        <block wx:for="{{groupedHistory}}" wx:key="name">
+          <view class="history-group" wx:if="{{item.records.length > 0}}">
+            <text class="group-title">{{item.name}}</text>
+            <block wx:for="{{item.records}}" wx:for-item="record" wx:key="id">
+              <view class="history-item" bindtap="onHistoryItemTap" data-item="{{record}}">
+                <view class="history-main">
+                  <text class="history-icon">{{record.preview ? '💬' : '📝'}}</text>
+                  <view class="history-info">
+                    <text class="history-text">{{record.title}}</text>
+                    <text class="history-time">{{record.updatedAt}}</text>
+                  </view>
+                </view>
+                <view class="delete-btn" catchtap="deleteSingleHistory" data-id="{{record.id}}">
+                  <text>🗑️</text>
+                </view>
+              </view>
+            </block>
+          </view>
+        </block>
+
+        <view class="empty-history" wx:if="{{hasNoHistory}}">
+          <text class="empty-icon">📭</text>
+          <text class="empty-text">暂无历史记录</text>
+        </view>
+      </scroll-view>
+
+      <view class="sidebar-footer">
+        <view class="clear-btn" bindtap="clearHistory">
+          <text class="clear-icon">🗑️</text>
+          <text class="clear-text">清空所有历史</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 游客模式提示条 -->
+  <view class="guest-banner" wx:if="{{isGuest}}">
+    <text class="guest-banner-icon">👤</text>
+    <text class="guest-banner-text">游客模式 · 今日剩余 {{guestRemaining}}/{{GUEST_DAILY_LIMIT}} 次</text>
+    <view class="guest-banner-btn" bindtap="onGuestBannerLogin">
+      <text>登录解锁全部</text>
+    </view>
+  </view>
+
+  <!-- 顶部栏 -->
+  <view class="top-bar {{isGuest ? 'top-bar-guest' : ''}}">
+    <view class="sidebar-toggle-btn" bindtap="toggleSidebar">
+      <text class="hamburger-icon">☰</text>
+    </view>
+    <text class="page-label">砷智答</text>
+  </view>
+
+  <scroll-view class="message-list {{isGuest ? 'message-list-guest' : ''}}" scroll-y scroll-into-view="{{scrollToView}}" scroll-with-animation enhanced show-scrollbar="{{false}}">
+    
+    <view class="welcome-section" wx:if="{{messages.length === 0 && !isTyping}}">
+      <view class="welcome-icon">
+        <text class="welcome-emoji">🧠</text>
+      </view>
+      <text class="welcome-title">您好，我是砷智答助手</text>
+      <text class="welcome-subtitle">很高兴为您提供铜冶炼过程中砷的资源化利用相关知识问答</text>
+      
+      <view class="quick-actions">
+        <view class="quick-action" bindtap="onRecommendationTap" data-text="铜冶炼砷污染怎么处理？">
+          <text class="action-icon">⚠️</text>
+          <text class="action-text">铜冶炼砷污染怎么处理？</text>
+        </view>
+        <view class="quick-action" bindtap="onRecommendationTap" data-text="砷有哪些资源化路径？">
+          <text class="action-icon">🔬</text>
+          <text class="action-text">砷有哪些资源化路径？</text>
+        </view>
+      </view>
+    </view>
+
+    <block wx:for="{{messages}}" wx:key="id">
+      <view class="message-wrapper" id="msg-{{index}}">
+        
+        <view class="message user-message" wx:if="{{item.type === 'user'}}">
+          <view class="message-content user-content">
+            <text>{{item.content}}</text>
+            <image
+              wx:if="{{item.hasImage && item.imageUrl}}"
+              class="msg-image"
+              src="{{item.imageUrl}}"
+              mode="widthFix"
+              bindtap="onPreviewImage"
+              data-url="{{item.imageUrl}}"
+            />
+            <view wx:if="{{item.hasFile && item.fileInfo}}" class="msg-file-card">
+              <text class="file-card-icon">📄</text>
+              <view class="file-card-info">
+                <text class="file-card-name">{{item.fileInfo.name}}</text>
+                <text class="file-card-size">{{item.fileInfo.sizeStr}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="avatar user-avatar">
+            <image
+              class="avatar-img"
+              src="{{item.avatarUrl || userAvatarUrl}}"
+              mode="aspectFill"
+              binderror="onUserAvatarError"
+              data-index="{{index}}"
+            />
+            <text class="avatar-fallback" wx:if="{{!item.avatarUrl && !userAvatarUrl}}">👤</text>
+          </view>
+        </view>
+
+        <view class="message ai-message" wx:if="{{item.type === 'ai'}}">
+          <view class="avatar ai-avatar">
+            <text>🤖</text>
+          </view>
+          <view class="message-content ai-content">
+            <!-- _thinking 阶段：纯文本 + 脉冲点动画（rich-text 不支持伪元素，需用 text） -->
+            <text wx:if="{{item._streaming && item._thinking}}" class="content-text thinking">正在思考</text>
+            <!-- 流式输出 + 输出完成：统一用 rich-text 实时渲染 markdown -->
+            <!-- 每帧实时转换 HTML，让用户直接看到最终样式，避免先显示原始符号再突变的割裂感 -->
+            <rich-text wx:else class="content-rich" nodes="{{item.contentHtml || item.content}}"></rich-text>
+            
+            <!-- RAG检索状态展示区域 -->
+            <!-- 有匹配结果时：展示知识块 -->
+            <view class="rag-chunks-section has-match" wx:if="{{item.retrievedChunks && item.retrievedChunks.length > 0 && item.hasKBMatch}}">
+              <view class="rag-chunks-header" bindtap="toggleChunksExpand" data-msg-id="{{item.id}}">
+                <view class="rag-chunks-title-row">
+                  <text class="rag-chunks-icon">📚</text>
+                  <text class="rag-chunks-title">检索依据 ({{item.retrievedChunks.length}} 个知识块)</text>
+                  <text class="rag-quality-tag {{item.matchQuality}}">{{item.matchQuality === 'high' ? '高相关' : item.matchQuality === 'medium' ? '较相关' : '参考'}}</text>
+                  <text class="rag-cross-tag" wx:if="{{item.retrievedChunks[0].searchMode === 'cross_lingual_vector'}}">🌐跨语言</text>
+                </view>
+                <view class="rag-chunks-toggle {{item.chunksExpanded ? 'expanded' : ''}}">
+                  <text class="toggle-arrow">▶</text>
+                </view>
+              </view>
+              
+              <view class="rag-chunks-body {{item.chunksExpanded ? 'show' : ''}}">
+                <view class="rag-chunks-meta">
+                  <text class="rag-meta-text">{{item.retrievedChunks[0].searchMode === 'cross_lingual_vector' ? '跨语言向量相似度匹配' : (item.retrievedChunks[0].searchMode === 'vector' ? '向量相似度匹配' : '文本关键词匹配')}}</text>
+                </view>
+                <block wx:for="{{item.retrievedChunks}}" wx:for-item="chunk" wx:key="id">
+                  <view class="rag-chunk-item" bindtap="onChunkTap" data-chunk="{{chunk}}">
+                    <view class="rag-chunk-top">
+                      <view class="rag-chunk-score">
+                        <text class="score-bar" style="width: {{chunk.scoreWidth}}%;"></text>
+                      </view>
+                      <text class="rag-chunk-percent">{{chunk.scorePercent}}%</text>
+                    </view>
+                    <text class="rag-chunk-title">{{chunk.title}}</text>
+                    <text class="rag-chunk-snippet">{{chunk.content}}</text>
+                    <view class="rag-chunk-source" wx:if="{{chunk.documentId}}">
+                      <text class="source-label">来源ID: </text>
+                      <text class="source-value">{{chunk.documentId}}</text>
+                    </view>
+                  </view>
+                </block>
+              </view>
+            </view>
+
+            <!-- 无匹配结果时：明确提示 -->
+            <view class="rag-no-match-section" wx:if="{{!item.hasKBMatch && !item._streaming && item.matchQuality !== ''}}">
+              <view class="no-match-content">
+                <text class="no-match-icon">🔍</text>
+                <view class="no-match-info">
+                  <text class="no-match-title">知识库中无相关内容</text>
+                  <text class="no-match-desc" wx:if="{{item.usedWebSearch}}">🌐 已启用联网搜索，以下回答基于实时网络信息生成</text>
+                  <text class="no-match-desc" wx:elif="{{item.matchQuality === 'no_match'}}">本次回答基于大模型通用知识生成，未检索到与问题相关的知识库资料</text>
+                  <text class="no-match-desc" wx:elif="{{item.matchQuality === 'error'}}">知识库检索服务暂时不可用</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 检索中状态（流式输出期间显示） -->
+            <view class="rag-retrieving-hint" wx:if="{{item._streaming && isRetrieving}}">
+              <view class="retrieving-spinner"></view>
+              <text class="retrieving-text">{{retrievalStatus || '正在检索...'}}</text>
+            </view>
+
+            <view class="warning-box" wx:if="{{item.warning}}">
+              <text class="warning-icon">⚠️</text>
+              <view class="warning-content">
+                <text class="warning-title">{{item.warning.title}}</text>
+                <text class="warning-text">{{item.warning.content}}</text>
+              </view>
+            </view>
+            <view class="continue-generation" wx:if="{{item.canContinue}}" bindtap="continueGeneration" data-msg-id="{{item.id}}">
+              <text>继续生成</text>
+            </view>
+
+            <view class="message-actions">
+              <view class="action-btn {{item._rated === 'up' ? 'rated' : ''}}" bindtap="onThumbUp" data-index="{{index}}" data-msg-id="{{item.id}}">
+                <text>👍</text>
+              </view>
+              <view class="action-btn {{item._rated === 'down' ? 'rated' : ''}}" bindtap="onThumbDown" data-index="{{index}}" data-msg-id="{{item.id}}">
+                <text>👎</text>
+              </view>
+              <view class="action-btn" bindtap="copyContent" data-content="{{item.content}}">
+                <text>📋</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="error-message" wx:if="{{item.type === 'error'}}">
+          <text>{{item.content}}</text>
+          <view class="retry-btn" bindtap="sendMessage">重试</view>
+        </view>
+        
+      </view>
+    </block>
+
+  </scroll-view>
+
+  <view class="input-section">
+    <scroll-view class="recommendations" scroll-x wx:if="{{messages.length > 0}}">
+      <block wx:for="{{recommendations}}" wx:key="text">
+        <view class="recommendation-item" bindtap="onRecommendationTap" data-text="{{item.text}}">
+          <text class="recommendation-icon">{{item.icon === 'search' ? '🔍' : '🔬'}}</text>
+          <text class="recommendation-text">{{item.text}}</text>
+        </view>
+      </block>
+    </scroll-view>
+
+    <view class="input-container">
+      <!-- 附件预览区 -->
+      <view class="attachment-preview" wx:if="{{attachments.length > 0}}">
+        <view
+          class="attachment-item {{item.type}}"
+          wx:for="{{attachments}}"
+          wx:key="id"
+        >
+          <image wx:if="{{item.type === 'image'}}" class="att-img" src="{{item.url}}" mode="aspectFill" />
+          <view wx:elif="{{item.type === 'file'}}" class="att-file">
+            <text class="att-file-icon">📄</text>
+            <text class="att-file-name">{{item.name}}</text>
+          </view>
+          <view class="att-remove" bindtap="onRemoveAttachment" data-id="{{item.id}}">
+            <text>✕</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 输入行 -->
+      <view class="input-row">
+        <!-- 输入框（内含所有按钮） -->
+        <view class="input-wrapper {{isLoading ? 'loading-state' : ''}} {{attachments.length > 0 ? 'has-attachment' : ''}}">
+          <!-- 左侧：语音按钮 -->
+          <view
+            class="voice-btn-inline {{isRecording ? 'recording' : ''}}"
+            bindtouchstart="onVoiceStart"
+            bindtouchend="onVoiceEnd"
+            bindtouchcancel="onVoiceEnd"
+          >
+            <text class="voice-icon-inline">{{isRecording ? recordTime + 's' : '🎤'}}</text>
+          </view>
+
+          <textarea
+            class="input-field"
+            placeholder="{{attachments.length > 0 ? '补充描述（可选）...' : '输入问题...'}}"
+            value="{{inputValue}}"
+            bindinput="onInputChange"
+            auto-height
+            maxlength="500"
+            disabled="{{isLoading}}"
+          />
+
+          <view class="input-actions">
+            <!-- + 号按钮 -->
+            <view class="inline-tool-btn plus-btn" bindtap="toggleMoreTools" wx:if="{{!isLoading}}">
+              <text class="plus-icon">{{showMoreTools ? '✕' : '+'}}</text>
+            </view>
+            <view class="stop-btn-send" wx:if="{{isLoading}}" bindtap="stopGeneration">
+              <text class="stop-icon-send">⏹</text>
+            </view>
+            <view class="send-btn {{inputValue || attachments.length > 0 ? 'active' : ''}}" wx:else bindtap="sendMessage">
+              <text class="send-icon">➤</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 工具菜单（+号展开） -->
+      <view class="tool-menu {{showMoreTools ? 'show' : ''}}" wx:if="{{!isLoading}}">
+        <view class="tool-menu-item" bindtap="onCamera">
+          <view class="tool-menu-icon">📷</view>
+          <text class="tool-menu-label">拍摄</text>
+        </view>
+        <view class="tool-menu-item" bindtap="onChooseImage">
+          <view class="tool-menu-icon">🖼️</view>
+          <text class="tool-menu-label">相册</text>
+        </view>
+        <view class="tool-menu-item" bindtap="onChooseFile">
+          <view class="tool-menu-icon">📎</view>
+          <text class="tool-menu-label">文件</text>
+        </view>
+      </view>
+    </view>
+
+    <text class="disclaimer" wx:if="{{messages.length === 0}}">AI 助手可能会生成不准确的信息，请核实重要数据</text>
+  </view>
+  
+  <tab-bar currentTab="index"></tab-bar>
+</view>

@@ -1,0 +1,238 @@
+/* ============================================================
+   登录页 - 原始设计
+   ============================================================ */
+.login-container {
+  min-height: 100vh;
+  background: linear-gradient(165deg, #eef2f7 0%, #dbe8f0 35%, #f0f4f8 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 36rpx 40rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== 装饰背景 ===== */
+.bg-decoration { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0 }
+.bg-circle { position: absolute; border-radius: 50%; opacity: 0.07 }
+.bg-circle-1 { width: 580rpx; height: 580rpx; background: #1a365d; top: -140rpx; right: -100rpx }
+.bg-circle-2 { width: 360rpx; height: 360rpx; background: #2563eb; bottom: -60rpx; left: -80rpx }
+.bg-dots {
+  position: absolute; width: 180rpx; height: 180rpx;
+  bottom: 100rpx; right: 30rpx;
+  background-image: radial-gradient(circle, #94a3b8 2rpx, transparent 2rpx);
+  background-size: 18rpx 18rpx; opacity: 0.12;
+}
+
+/* ===== 内容区 ===== */
+.login-content {
+  width: 100%; max-width: 620rpx;
+  display: flex; flex-direction: column; align-items: center;
+  position: relative; z-index: 1;
+}
+
+/* ===== Logo ===== */
+.logo-section { display: flex; flex-direction: column; align-items: center; margin-bottom: 44rpx }
+.logo-icon {
+  width: 132rpx; height: 132rpx;
+  background: linear-gradient(145deg, #1a365d, #0A3D62);
+  border-radius: 38rpx;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24rpx;
+  box-shadow: 0 14rpx 40rpx rgba(26,54,93,0.22), 0 4rpx 12rpx rgba(26,54,93,0.08) inset;
+}
+.logo-emoji { font-size: 68rpx }
+.app-title { font-size: 50rpx; font-weight: 800; color: #1a365d; letter-spacing: 0.03em }
+.app-subtitle { font-size: 25rpx; color: #64748b; margin-top: 6rpx; letter-spacing: 0.12em }
+
+/* ===== 授权卡片 ===== */
+.auth-card {
+  width: 100%;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16rpx);
+  border-radius: 32rpx;
+  padding: 36rpx 28rpx 28rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04), 0 8rpx 32rpx rgba(0,0,0,0.06), inset 0 1rpx 0 rgba(255,255,255,0.8);
+  border: 1rpx solid rgba(255,255,255,0.7);
+}
+.card-header { text-align: center; margin-bottom: 28rpx }
+.card-title { font-size: 34rpx; font-weight: 700; color: #1a365d; display: block }
+.card-subtitle { font-size: 24rpx; color: #94a3b8; margin-top: 6rpx; display: block }
+
+/* ===== 头像 + 昵称行 ===== */
+.profile-row {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 16rpx;
+  margin-bottom: 28rpx;
+}
+
+/* --- 头像 --- */
+.avatar-btn {
+  padding: 0; margin: 0;
+  padding-left: 65px;
+  background: transparent; border: none;
+  line-height: 1;
+}
+
+.avatar-btn::after { border: none }
+
+.avatar-ring {
+  margin-left: 0px;
+  width: 100rpx; height: 100rpx;
+  border-radius: 50%;
+  padding: 4rpx;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 14rpx rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.avatar-ring.has-avatar {
+  background: linear-gradient(135deg, #1a365d, #2563eb, #0A3D62);
+  box-shadow: 0 6rpx 22rpx rgba(26,54,93,0.25);
+}
+.avatar-ring:active { transform: scale(0.95) }
+
+.user-avatar {
+  width: 92rpx; height: 92rpx;
+  border-radius: 50%;
+  display: block;
+}
+
+.avatar-placeholder {
+  width: 92rpx; height: 92rpx;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex; align-items: center; justify-content: center;
+}
+.placeholder-icon { font-size: 44rpx; opacity: 0.45 }
+
+/* --- 昵称列 --- */
+.nickname-col {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 8rpx;
+}
+.field-label {
+  display: flex; align-items: baseline; gap: 4rpx;
+}
+.field-label text:first-child {
+  font-size: 25rpx; font-weight: 600; color: #334155;
+}
+.required-star { font-size: 24rpx; color: #ef4444; font-weight: 600 }
+
+.nickname-input {
+  width: 100%; height: 84rpx;
+  background: #fff;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 18rpx;
+  padding: 0 22rpx;
+  font-size: 29rpx;
+  color: #1a1c1e;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  box-shadow: 0 1rpx 4rpx rgba(0,0,0,0.02);
+}
+.nickname-input:focus {
+  border-color: #0A3D62;
+  box-shadow: 0 0 0 5rpx rgba(10,61,98,0.06);
+}
+.input-placeholder { color: #c0c8d4; font-size: 27rpx }
+
+.field-hint { padding-left: 2rpx }
+.field-hint text { font-size: 22rpx; color: #94a3b8 }
+
+/* ===== 错误提示 ===== */
+.login-error {
+  background: #fef2f2; border: 1rpx solid #fecaca;
+  border-radius: 14rpx; padding: 14rpx 18rpx;
+  margin-bottom: 22rpx;
+  animation: shake 0.4s ease;
+}
+.login-error text { font-size: 25rpx; color: #dc2626; font-weight: 500 }
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8rpx)} 40%,80%{transform:translateX(8rpx)}
+}
+
+/* ===== 登录按钮 ===== */
+.btn-login {
+  width: 100%; height: 94rpx;
+  background: linear-gradient(135deg, #07C160, #06ae56);
+  color: #fff;
+  border-radius: 28rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32rpx; font-weight: 700;
+  border: none;
+  box-shadow: 0 6rpx 22rpx rgba(7,193,96,0.3);
+  transition: all 0.25s ease;
+  letter-spacing: 0.06em;
+}
+.btn-login:active { transform: scale(0.97); box-shadow: 0 3rpx 12rpx rgba(7,193,96,0.25) }
+.btn-login.disabled { opacity: 0.5; pointer-events: none }
+
+/* ===== 分割线 ===== */
+.divider-row {
+  display: flex; align-items: center; gap: 16rpx;
+  margin: 24rpx 0 16rpx;
+}
+.divider-line { flex: 1; height: 1rpx; background: #e2e8f0 }
+.divider-text { font-size: 23rpx; color: #94a3b8; white-space: nowrap }
+
+.guest-entry { text-align: center; padding: 10rpx 0 }
+.guest-entry text { font-size: 26rpx; color: #94a3b8 }
+.guest-entry:active text { color: #64748b }
+
+/* ===== 隐私协议 ===== */
+.privacy-section { width: 100%; padding-top: 20rpx }
+.privacy-label { display: flex; padding-top: 0px;align-items: flex-start; justify-content: center; gap: 10rpx }
+.privacy-text { font-size: 22rpx; color: #94a3b8; padding-top: 4px;line-height: 1.75; text-align: center }
+.privacy-link { color: #0A3D62; font-weight: 600 }
+
+/* ===== 安全提示 ===== */
+.safe-hint {
+  display: flex; align-items: center; justify-content: center; gap: 8rpx;
+  margin-top: 10rpx; padding-bottom: 40rpx;
+}
+.safe-icon { font-size: 24rpx }
+.safe-text { font-size: 21rpx; color: #c0c8d4 }
+
+
+/* ============================================================
+   深色模式
+   ============================================================ */
+.dark-theme.login-container {
+  background: linear-gradient(165deg, #0f172a 0%, #1e293b 35%, #0f172a 100%);
+}
+.dark-theme .bg-circle-1, .dark-theme .bg-circle-2 { opacity: 0.09 }
+.dark-theme .bg-dots { opacity: 0.08 }
+
+.dark-theme .app-title { color: #e2e8f0 }
+.dark-theme .app-subtitle { color: #64748b }
+
+.dark-theme .auth-card {
+  background: rgba(30,41,59,0.88);
+  border-color: rgba(51,65,85,0.5);
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15), 0 8rpx 32rpx rgba(0,0,0,0.2);
+}
+.dark-theme .card-title { color: #e2e8f0 }
+.dark-theme .card-subtitle { color: #64748b }
+
+.dark-theme .avatar-ring { background: linear-gradient(135deg, #475569, #334155) }
+.dark-theme .avatar-ring.has-avatar { background: linear-gradient(135deg, #2563eb, #1d4ed8, #1e40af) }
+.dark-theme .avatar-placeholder { background: #334155 }
+
+.dark-theme .field-label text:first-child { color: #cbd5e1 }
+.dark-theme .nickname-input { background: #1e293b; border-color: #475569; color: #e2e8f0 }
+.dark-theme .nickname-input:focus { border-color: #3b82f6; background: #0f172a }
+.dark-theme .input-placeholder { color: #64748b }
+.dark-theme .field-hint text { color: #64748b }
+
+.dark-theme .login-error { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.25) }
+.dark-theme .login-error text { color: #fca5a5 }
+
+.dark-theme .divider-line { background: #334155 }
+.dark-theme .guest-entry text { color: #64748b }
+
+.dark-theme .privacy-text { color: #64748b }
+.dark-theme .privacy-link { color: #60a5fa }
+
+.dark-theme .safe-text { color: #475569 }

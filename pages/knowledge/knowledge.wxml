@@ -1,0 +1,483 @@
+<view class="kb-page {{darkMode ? 'dark-theme' : ''}}">
+
+  <!-- ============ 顶部 Tab ============ -->
+  <view class="tab-header">
+    <view class="tab-item {{activeTab === 'docs' ? 'active' : ''}}" bindtap="switchTab" data-tab="docs">
+      <text class="tab-icon">📚</text>
+      <text class="tab-label">文档</text>
+    </view>
+    <view class="tab-item {{activeTab === 'qa' ? 'active' : ''}}" bindtap="switchTab" data-tab="qa">
+      <text class="tab-icon">💬</text>
+      <text class="tab-label">问答</text>
+    </view>
+  </view>
+
+  <!-- ============ 文档视图 ============ -->
+  <view wx:if="{{activeTab === 'docs'}}" class="docs-view">
+
+    <!-- 统计卡 -->
+    <view class="stats-row">
+      <view class="stat-card">
+        <text class="stat-num">{{stats.documentCount}}</text>
+        <text class="stat-lbl">文档</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-num">{{stats.chunkCount}}</text>
+        <text class="stat-lbl">切片</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-num">{{stats.historyCount}}</text>
+        <text class="stat-lbl">问答</text>
+      </view>
+    </view>
+
+    <!-- 上传按钮 -->
+    <view class="upload-row">
+      <view class="upload-btn" bindtap="openUpload">
+        <text class="upload-plus">＋</text>
+        <text>上传文件</text>
+      </view>
+    </view>
+
+    <!-- 引导提示 -->
+    <view class="upload-guide">
+      <text class="guide-icon">💡</text>
+      <text class="guide-text">上传文件至你的个人知识库，切换到「智能问答」即可基于文档内容提问</text>
+    </view>
+
+    <!-- 分类筛选 -->
+    <scroll-view class="category-scroll" scroll-x show-scrollbar="{{false}}">
+      <view
+        wx:for="{{categories}}"
+        wx:key="*this"
+        class="cat-chip {{filterCategory === item ? 'active' : ''}}"
+        bindtap="filterByCategory"
+        data-cat="{{item}}"
+      >{{item}}</view>
+    </scroll-view>
+
+    <!-- 标签筛选（仅有可用标签时显示入口） -->
+    <view wx:if="{{availableTags.length > 0}}" class="tag-filter-wrap">
+      <view class="tag-filter-header" bindtap="toggleTagFilter">
+        <text class="tf-title">🏷 标签筛选{{selectedTags.length > 0 ? '（已选 ' + selectedTags.length + '）' : ''}}</text>
+        <text class="tf-arrow {{tagFilterExpanded ? 'expanded' : ''}}">▾</text>
+      </view>
+      <view wx:if="{{tagFilterExpanded}}" class="tag-filter-body fade-in">
+        <view class="tag-mode-row">
+          <view class="tag-mode-btn {{tagMode === 'or' ? 'active' : ''}}" bindtap="toggleTagMode">满足任一 (OR)</view>
+          <view class="tag-mode-btn {{tagMode === 'and' ? 'active' : ''}}" bindtap="toggleTagMode">全部满足 (AND)</view>
+          <view wx:if="{{selectedTags.length > 0}}" class="tag-clear-btn" bindtap="clearSelectedTags">清空</view>
+        </view>
+        <view class="tag-chip-list">
+          <view
+            wx:for="{{availableTags}}"
+            wx:key="tag"
+            class="tag-chip {{selectedTags.indexOf(item.tag) >= 0 ? 'active' : ''}}"
+            bindtap="toggleTag"
+            data-tag="{{item.tag}}"
+          >#{{item.tag}}<text class="tag-count">{{item.count}}</text></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 文档列表 -->
+    <view class="doc-list">
+      <!-- 骨架屏：首次加载 -->
+      <block wx:if="{{docLoading && documents.length === 0}}">
+        <view wx:for="{{[1,2,3]}}" wx:key="*this" class="doc-card skeleton-card">
+          <view class="skeleton-icon skeleton-shimmer"></view>
+          <view class="skeleton-body">
+            <view class="skeleton-line skeleton-shimmer" style="width: 60%"></view>
+            <view class="skeleton-line skeleton-shimmer" style="width: 40%"></view>
+            <view class="skeleton-line skeleton-shimmer" style="width: 30%"></view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 错误状态：可重试 -->
+      <view wx:elif="{{docError}}" class="empty-state error-state">
+        <text class="empty-icon">⚠</text>
+        <text class="empty-text">{{docError}}</text>
+        <view class="retry-btn" bindtap="retryLoadDocs">↻ 重试</view>
+      </view>
+
+      <view wx:elif="{{documents.length === 0}}" class="empty-state">
+        <text class="empty-icon">📂</text>
+        <text class="empty-text">暂无文档</text>
+        <text class="empty-hint">点击上方"上传文件"开始构建你的知识库</text>
+      </view>
+
+      <block wx:else>
+        <view
+          wx:for="{{documents}}"
+          wx:key="id"
+          class="doc-card fade-in"
+          bindtap="openDocDetail"
+          data-id="{{item.id}}"
+        >
+          <view class="doc-icon icon-{{item.fileType}}">{{item.icon}}</view>
+          <view class="doc-body">
+            <view class="doc-name">{{item.name}}</view>
+            <view class="doc-meta">
+              <text class="meta-cat">{{item.category}}</text>
+              <text class="meta-dot">·</text>
+              <text>{{item.sizeText}}</text>
+              <text class="meta-dot">·</text>
+              <text>{{item.chunkCount}}切片</text>
+            </view>
+            <view wx:if="{{item.tags.length > 0}}" class="doc-tags">
+              <text
+                wx:for="{{item.tags}}"
+                wx:for-item="tag"
+                wx:key="*this"
+                class="doc-tag"
+              >#{{tag}}</text>
+            </view>
+            <view wx:if="{{item.status === 'processing'}}" class="doc-status status-processing">⟳ 处理中</view>
+            <view wx:elif="{{item.status === 'failed'}}" class="doc-status status-failed">⚠ 处理失败</view>
+            <view wx:elif="{{!item.searchable}}" class="doc-status status-warn">🗎 仅存档</view>
+          </view>
+          <view class="doc-del" catchtap="deleteDoc" data-id="{{item.id}}" data-name="{{item.name}}">删除</view>
+        </view>
+
+        <view wx:if="{{docLoading}}" class="loading-more">加载中...</view>
+        <view wx:elif="{{!docHasMore}}" class="no-more">没有更多了</view>
+      </block>
+    </view>
+  </view>
+
+  <!-- ============ 问答视图 ============ -->
+  <view wx:if="{{activeTab === 'qa'}}" class="qa-view">
+
+    <!-- 工具栏 -->
+    <view class="qa-toolbar">
+      <view class="toolbar-btn" bindtap="toggleHistoryPanel">
+        {{showHistoryPanel ? '收起历史' : '🕐 提问历史'}}
+      </view>
+      <view class="toolbar-btn" bindtap="newConversation">✦ 新对话</view>
+    </view>
+
+    <!-- 历史面板（双层：会话列表 → 会话内消息） -->
+    <view wx:if="{{showHistoryPanel}}" class="history-panel fade-in">
+
+      <!-- 会话列表视图 -->
+      <block wx:if="{{historyView === 'sessions'}}">
+        <view class="hp-title-bar">
+          <text class="hp-title">💬 历史会话</text>
+          <text class="hp-count">{{sessions.length}}</text>
+        </view>
+        <view wx:if="{{sessionsLoading}}" class="history-empty">加载中...</view>
+        <view wx:elif="{{sessions.length === 0}}" class="history-empty">暂无历史会话</view>
+        <block wx:else>
+          <view
+            wx:for="{{sessions}}"
+            wx:key="sessionId"
+            class="session-item"
+          >
+            <view class="si-main" bindtap="openSession" data-session-id="{{item.sessionId}}">
+              <view class="si-title">{{item.title}}</view>
+              <view class="si-meta">
+                <text>{{item.count}} 条</text>
+                <text class="si-dot">·</text>
+                <text>{{item.timeText}}</text>
+              </view>
+            </view>
+            <view class="si-actions">
+              <view class="si-resume" catchtap="resumeSession" data-session-id="{{item.sessionId}}">继续</view>
+              <view class="si-del" catchtap="deleteSession" data-session-id="{{item.sessionId}}" data-title="{{item.title}}">✕</view>
+            </view>
+          </view>
+        </block>
+      </block>
+
+      <!-- 会话内消息视图 -->
+      <block wx:else>
+        <view class="hp-title-bar">
+          <view class="hp-back" bindtap="backToSessions">‹ 返回</view>
+          <text class="hp-title">会话详情</text>
+        </view>
+        <view wx:if="{{historyLoading}}" class="history-empty">加载中...</view>
+        <view wx:elif="{{history.length === 0}}" class="history-empty">该会话无记录</view>
+        <block wx:else>
+          <view
+            wx:for="{{history}}"
+            wx:key="id"
+            class="history-item"
+          >
+            <view class="hi-main" bindtap="loadHistoryItem" data-index="{{index}}">
+              <view class="hi-q">{{item.question}}</view>
+              <view class="hi-time">{{item.timeText}}</view>
+            </view>
+            <view class="hi-del" catchtap="deleteHistory" data-id="{{item.id}}">✕</view>
+          </view>
+        </block>
+      </block>
+    </view>
+
+    <!-- 消息区 -->
+    <scroll-view
+      class="msg-scroll"
+      scroll-y
+      scroll-into-view="{{scrollIntoView}}"
+      scroll-with-animation
+      enhanced
+      show-scrollbar="{{false}}"
+    >
+      <view wx:if="{{messages.length === 0}}" class="qa-welcome">
+        <text class="welcome-icon">💬</text>
+        <text class="welcome-title">基于你的知识库提问</text>
+        <text class="welcome-desc">上传文档后，即可针对内容智能问答</text>
+        <view wx:if="{{stats.documentCount === 0}}" class="welcome-tip">
+          知识库为空，将基于通识回答
+        </view>
+      </view>
+
+      <view
+        wx:for="{{messages}}"
+        wx:key="id"
+        class="msg-row {{item.role === 'user' ? 'msg-user' : 'msg-ai'}}"
+      >
+        <!-- AI 头像（与首页一致：🤖 + 海军蓝底） -->
+        <view wx:if="{{item.role === 'ai'}}" class="msg-avatar msg-avatar-ai">
+          <text>🤖</text>
+        </view>
+
+        <view class="msg-content">
+          <view class="msg-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+            <text class="content-text">{{item.content}}</text>
+          </view>
+          <view wx:if="{{item.sources && item.sources.length > 0}}" class="msg-sources">
+            <view class="src-title">📎 参考来源</view>
+            <view
+              wx:for="{{item.sources}}"
+              wx:for-item="src"
+              wx:for-index="sidx"
+              wx:key="docId"
+              class="src-item"
+            >
+              <text class="src-name">[{{sidx + 1}}] {{src.docName}}</text>
+              <text class="src-score">相关度 {{src.score}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 用户头像（与首页同步：真实头像图片 + fallback） -->
+        <view wx:if="{{item.role === 'user'}}" class="msg-avatar msg-avatar-user">
+          <image
+            wx:if="{{userAvatarUrl}}"
+            class="avatar-img"
+            src="{{userAvatarUrl}}"
+            mode="aspectFill"
+            binderror="onUserAvatarError"
+          />
+          <text wx:else class="avatar-fallback">👤</text>
+        </view>
+      </view>
+
+      <view wx:if="{{qaLoading}}" class="msg-row msg-ai">
+        <view class="msg-avatar msg-avatar-ai">
+          <text>🤖</text>
+        </view>
+        <view class="msg-content">
+          <view class="msg-bubble bubble-ai typing">
+            <text class="typing-dot">·</text>
+            <text class="typing-dot">·</text>
+            <text class="typing-dot">·</text>
+          </view>
+        </view>
+      </view>
+
+      <view id="msg-bottom" class="msg-bottom-anchor"></view>
+    </scroll-view>
+
+    <!-- 底部输入（与首页风格一致：药丸容器 + 圆形发送按钮） -->
+    <view class="qa-input-section safe-bottom">
+      <view class="qa-input-container">
+        <view class="qa-input-wrapper">
+          <textarea
+            class="qa-input-field"
+            value="{{qaInput}}"
+            bindinput="onQaInput"
+            bindconfirm="sendQuestion"
+            placeholder="基于我的知识库提问..."
+            placeholder-class="qa-input-ph"
+            confirm-type="send"
+            auto-height
+            maxlength="500"
+            adjust-position="{{true}}"
+            cursor-spacing="20"
+            disable-default-padding="{{true}}"
+          />
+          <view
+            class="qa-send-btn {{qaInput && !qaLoading ? 'active' : ''}}"
+            bindtap="sendQuestion"
+          >
+            <text class="qa-send-icon">➤</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部导航 -->
+  <tab-bar currentTab="knowledge"></tab-bar>
+</view>
+
+<!-- ============ 上传弹窗 ============ -->
+<view wx:if="{{uploadModal.show}}" class="modal-mask" catchtap="closeUpload">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-title">上传到知识库</view>
+
+    <view class="modal-body">
+      <!-- 文件选择 -->
+      <view class="form-row">
+        <view class="form-label">文件</view>
+        <view class="form-control">
+          <view wx:if="{{!uploadModal.fileName}}" class="picker-btns">
+            <view class="pick-btn" bindtap="pickFile">📄 选聊天文件</view>
+            <view class="pick-btn" bindtap="pickImage">🖼 选图片</view>
+          </view>
+          <view wx:else class="file-chosen">
+            <text class="file-name">{{uploadModal.fileName}}</text>
+            <text class="file-clear" bindtap="clearFile">✕</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 分类 -->
+      <view class="form-row">
+        <view class="form-label">分类</view>
+        <view class="form-control">
+          <picker mode="selector" range="{{categories}}" value="{{uploadModal.categoryIndex}}" bindchange="onCategoryChange">
+            <view class="picker-value">{{categories[uploadModal.categoryIndex]}} ▾</view>
+          </picker>
+        </view>
+      </view>
+
+      <!-- 标签 -->
+      <view class="form-row">
+        <view class="form-label">标签</view>
+        <view class="form-control">
+          <input
+            class="form-input"
+            value="{{uploadModal.tagsInput}}"
+            bindinput="onTagsInput"
+            placeholder="多个标签用逗号分隔（可选）"
+            placeholder-class="form-input-ph"
+          />
+        </view>
+      </view>
+
+      <!-- 上传进度 -->
+      <view wx:if="{{uploadModal.uploading}}" class="progress-wrap">
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{uploadModal.progress}}%"></view>
+        </view>
+        <text class="progress-text">{{uploadModal.progress}}% · 解析嵌入中...</text>
+      </view>
+
+      <view class="form-tip">
+        支持 txt / md / pdf / docx / 图片（图片自动 OCR 入库可检索）
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <view class="modal-btn cancel" bindtap="closeUpload">取消</view>
+      <view
+        class="modal-btn confirm {{(uploadModal.uploading || !uploadModal.fileName) ? 'disabled' : ''}}"
+        bindtap="submitUpload"
+      >{{uploadModal.uploading ? '上传中' : '开始上传'}}</view>
+    </view>
+  </view>
+</view>
+
+<!-- ============ 文档详情弹窗 ============ -->
+<view wx:if="{{detailModal.show}}" class="modal-mask" catchtap="closeDocDetail">
+  <view class="modal-content detail-content" catchtap="stopPropagation">
+    <view class="modal-title">文档详情</view>
+
+    <view wx:if="{{detailModal.loading && !detailModal.document}}" class="detail-loading">
+      <text>加载中...</text>
+    </view>
+
+    <block wx:else>
+      <!-- 文档元数据 -->
+      <view class="detail-header">
+        <view class="detail-icon icon-{{detailModal.document.fileType}}">{{detailModal.document.icon}}</view>
+        <view class="detail-info">
+          <view class="detail-name">{{detailModal.document.name}}</view>
+          <view class="detail-meta">
+            <text class="meta-cat">{{detailModal.document.category}}</text>
+            <text class="meta-dot">·</text>
+            <text>{{detailModal.document.sizeText}}</text>
+            <text class="meta-dot">·</text>
+            <text>{{detailModal.document.chunkCount}}切片</text>
+            <text class="meta-dot">·</text>
+            <text>{{detailModal.document.wordCount}}字</text>
+          </view>
+          <view class="detail-meta">
+            <text>解析方式：{{detailModal.document.parseMethod || '-'}}</text>
+            <text wx:if="{{detailModal.document.createdText}}" class="meta-dot">·</text>
+            <text wx:if="{{detailModal.document.createdText}}">{{detailModal.document.createdText}}</text>
+          </view>
+          <view wx:if="{{detailModal.document.tags.length > 0}}" class="doc-tags">
+            <text
+              wx:for="{{detailModal.document.tags}}"
+              wx:for-item="tag"
+              wx:key="*this"
+              class="doc-tag"
+            >#{{tag}}</text>
+          </view>
+          <view wx:if="{{detailModal.document.status === 'processing'}}" class="doc-status status-processing">⟳ 处理中</view>
+          <view wx:elif="{{detailModal.document.status === 'failed'}}" class="doc-status status-failed">⚠ {{detailModal.document.errorMsg || '处理失败'}}</view>
+          <view wx:elif="{{!detailModal.document.searchable}}" class="doc-status status-warn">🗎 仅存档 · {{detailModal.document.note || '无可检索文本'}}</view>
+          <view wx:else class="doc-status status-ready">✓ 可检索</view>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="detail-actions">
+        <view
+          class="detail-btn reprocess {{detailModal.reprocessing ? 'disabled' : ''}}"
+          bindtap="reprocessDoc"
+        >{{detailModal.reprocessing ? '解析中...' : '↻ 重新解析'}}</view>
+      </view>
+
+      <!-- 切片预览 -->
+      <view class="detail-section-title">
+        📑 切片预览（{{detailModal.totalChunks}}）
+      </view>
+      <view wx:if="{{detailModal.loading}}" class="detail-loading"><text>加载切片...</text></view>
+      <view wx:elif="{{detailModal.chunks.length === 0}}" class="detail-empty">
+        <text>暂无切片</text>
+      </view>
+      <block wx:else>
+        <view
+          wx:for="{{detailModal.chunks}}"
+          wx:key="id"
+          class="chunk-card"
+        >
+          <view class="chunk-idx">#{{item.chunkIndex + 1}}</view>
+          <view class="chunk-text">{{item.preview}}{{item.text.length > 280 ? '...' : ''}}</view>
+        </view>
+
+        <!-- 分页 -->
+        <view class="chunk-pager">
+          <view
+            class="pager-btn {{detailModal.chunkPage <= 1 ? 'disabled' : ''}}"
+            bindtap="prevChunks"
+          >‹ 上一页</view>
+          <text class="pager-info">{{detailModal.chunkPage}} / {{detailModal.hasMoreChunks ? '...' : detailModal.chunkPage}}</text>
+          <view
+            class="pager-btn {{!detailModal.hasMoreChunks ? 'disabled' : ''}}"
+            bindtap="loadMoreChunks"
+          >下一页 ›</view>
+        </view>
+      </block>
+    </block>
+
+    <view class="modal-footer">
+      <view class="modal-btn cancel" bindtap="closeDocDetail">关闭</view>
+    </view>
+  </view>
+</view>

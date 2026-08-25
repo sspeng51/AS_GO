@@ -1,0 +1,1 @@
+{"name": "wechatLogin", "version": "1.0.0", "description": "微信小程序登录云函数 - code 换取 openid + 用户信息管理", "main": "index.js", "dependencies": {"wx-server-sdk": "~2.6.3"}}

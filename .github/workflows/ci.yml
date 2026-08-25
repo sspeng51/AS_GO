@@ -1,0 +1,59 @@
+name: Project checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web-admin/client/package-lock.json
+            web-admin/server/package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install admin dependencies
+        run: |
+          npm ci --prefix web-admin/server
+          npm ci --prefix web-admin/client
+
+      - name: Core tests
+        run: npm test
+
+      - name: JavaScript syntax check
+        run: npm run check
+
+      - name: Secret and security checks
+        run: npm run check:security
+
+      - name: Cloud function deploy config check
+        run: npm run deploy:cloud:check
+
+      - name: Batch importer dry run
+        run: node tools/batch-import.js --data-dir tools --dry-run
+
+      - name: Build admin client
+        run: npm run build --prefix web-admin/client
+
+      - name: Dependency security audit
+        run: |
+          npm audit --audit-level=high
+          npm audit --audit-level=high --prefix web-admin/server
+          npm audit --audit-level=high --prefix web-admin/client

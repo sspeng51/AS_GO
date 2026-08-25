@@ -1,0 +1,195 @@
+<view class="graph-container {{darkMode ? 'dark-theme' : ''}}">
+
+  <!-- ===== 顶部头部区域 ===== -->
+  <view class="graph-header">
+    <view class="header-top">
+      <view class="header-title-row">
+        <text class="header-icon">🔬</text>
+        <text class="header-title">砷资源化知识图谱</text>
+        <view class="source-badge" wx:if="{{dataSource === 'neo4j' && !graphLoading}}">
+          <text class="source-badge-dot"></text>
+          <text class="source-badge-text">Neo4j</text>
+        </view>
+      </view>
+      <text class="header-subtitle">铜冶炼过程中砷的资源化利用知识体系</text>
+    </view>
+
+    <!-- 搜索栏（仅在有数据时显示） -->
+    <view class="search-bar" wx:if="{{totalNodes > 0 && !graphLoading}}">
+      <view class="search-input-wrapper">
+        <text class="search-icon">🔍</text>
+        <input
+          class="search-input"
+          placeholder="搜索节点名称、关键词..."
+          placeholder-class="search-placeholder"
+          value="{{searchText}}"
+          bindinput="onSearchInput"
+          bindfocus="onSearchFocus"
+          bindblur="onSearchBlur"
+        />
+        <view class="search-clear" wx:if="{{searchText}}" bindtap="onSearchClear">
+          <text>✕</text>
+        </view>
+      </view>
+
+      <!-- 搜索结果下拉 -->
+      <view class="search-results" wx:if="{{showSearch && searchResults.length > 0}}">
+        <view
+          class="search-result-item"
+          wx:for="{{searchResults}}"
+          wx:key="name"
+          bindtap="onSearchResultTap"
+          data-name="{{item.name}}"
+        >
+          <view class="result-dot" style="background: {{item.category >= 0 ? categories[item.category].color : '#0A3D62'}};"></view>
+          <view class="result-info">
+            <text class="result-name">{{item.name}}</text>
+            <text class="result-desc">{{item.desc}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="search-empty" wx:if="{{showSearch && searchText && searchResults.length === 0}}">
+        <text>未找到相关节点</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 加载中状态 ===== -->
+  <view class="state-container" wx:if="{{graphLoading}}">
+    <view class="state-loading">
+      <view class="loading-spinner"></view>
+      <text class="state-title">正在从 Neo4j 加载图谱数据...</text>
+      <text class="state-desc">请稍候</text>
+    </view>
+  </view>
+
+  <!-- ===== 错误/空状态 ===== -->
+  <view class="state-container" wx:elif="{{loadFailed || totalNodes === 0}}">
+    <view class="state-error">
+      <text class="state-emoji">📡</text>
+      <text class="state-title">{{graphError || '暂无图谱数据'}}</text>
+      <text class="state-desc" wx:if="{{loadFailed}}">请检查 Neo4j 连接配置或网络后重试</text>
+      <view class="state-retry-btn" bindtap="onRetryFetch">
+        <text>重试</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 正常图谱视图 ===== -->
+  <block wx:else>
+    <!-- 分类筛选栏 -->
+    <scroll-view class="category-bar" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+      <view class="category-list">
+        <view
+          class="category-chip {{activeCategory === index ? 'active' : ''}}"
+          wx:for="{{categoryStats}}"
+          wx:key="name"
+          bindtap="onCategoryTap"
+          data-index="{{index}}"
+          style="--cat-color: {{item.color}};"
+        >
+          <text class="category-icon">{{item.icon}}</text>
+          <text class="category-name">{{item.name}}</text>
+          <text class="category-count">{{item.count}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 图表区 -->
+    <view class="chart-wrapper">
+      <!-- 加载提示 -->
+      <view class="chart-loading" wx:if="{{!chartReady}}">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">图谱渲染中...</text>
+      </view>
+
+      <ec-canvas
+        canvas-id="graphCanvas"
+        ec="{{ec}}"
+        echarts="{{echarts}}"
+      ></ec-canvas>
+
+      <!-- 浮动重置按钮 -->
+      <view class="float-actions" wx:if="{{chartReady}}">
+        <view class="float-btn" bindtap="onResetView">
+          <text class="float-btn-icon">⟲</text>
+        </view>
+      </view>
+
+      <!-- 统计信息 -->
+      <view class="stats-bar">
+        <view class="stat-item">
+          <text class="stat-num">{{totalNodes}}</text>
+          <text class="stat-label">节点</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="stat-num">{{totalLinks}}</text>
+          <text class="stat-label">关系</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="stat-num">{{categoryStats.length}}</text>
+          <text class="stat-label">分类</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部提示 -->
+    <view class="hint-bar">
+      <text class="hint-text">💡 拖拽节点 · 双指缩放 · 点击查看详情</text>
+    </view>
+  </block>
+
+  <!-- ===== 节点详情弹窗 ===== -->
+  <view class="node-detail-mask" wx:if="{{showDetail}}" bindtap="onCloseDetail"></view>
+  <view class="node-detail-panel {{showDetail ? 'show' : ''}}">
+    <!-- 顶部拖拽指示器 -->
+    <view class="detail-handle"></view>
+
+    <view class="detail-header">
+      <view class="detail-header-left">
+        <view class="detail-category-tag" style="background: {{selectedNode.categoryColor}}20; color: {{selectedNode.categoryColor}};">
+          <text class="tag-icon">{{selectedNode.categoryIcon}}</text>
+          <text>{{selectedNode.categoryName}}</text>
+        </view>
+        <text class="detail-title">{{selectedNode.name}}</text>
+      </view>
+      <view class="detail-close" bindtap="onCloseDetail">
+        <text>✕</text>
+      </view>
+    </view>
+
+    <scroll-view class="detail-body" scroll-y="true" enhanced="true" show-scrollbar="{{false}}">
+      <!-- 概念说明 -->
+      <view class="detail-desc-section">
+        <text class="detail-section-label">概念说明</text>
+        <text class="detail-desc">{{selectedNode.desc || '暂无描述'}}</text>
+      </view>
+
+      <!-- 关联概念：显示关系类型 + 目标节点 -->
+      <view class="detail-section" wx:if="{{selectedNode.links && selectedNode.links.length > 0}}">
+        <view class="detail-section-header">
+          <text class="detail-section-label">关联概念</text>
+          <text class="detail-section-count">{{selectedNode.links.length}} 个</text>
+        </view>
+        <view class="detail-link-list">
+          <view
+            class="detail-link-item"
+            wx:for="{{selectedNode.links}}"
+            wx:key="name"
+            bindtap="onLinkTap"
+            data-name="{{item.name}}"
+          >
+            <text class="link-rel-type">{{item.relType}}</text>
+            <text class="link-arrow">→</text>
+            <text class="link-target-name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <tab-bar currentTab="graph"></tab-bar>
+</view>

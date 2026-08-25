@@ -1,0 +1,21 @@
+<view class="custom-tabbar">
+  <view
+    class="tab-item {{item.key === currentTab ? 'active' : ''}} {{item.key === 'index' && chatStreaming ? 'has-streaming' : ''}}"
+    wx:for="{{tabs}}"
+    wx:key="key"
+    bindtap="switchTab"
+    data-key="{{item.key}}"
+  >
+    <view class="tab-indicator"></view>
+    <text class="tab-icon">{{item.icon}}</text>
+    <text class="tab-text">{{item.text}}</text>
+    <!-- AI 思考中红点指示器（仅在"对话"Tab 显示，点击跳回查看进度） -->
+    <view
+      wx:if="{{item.key === 'index' && chatStreaming}}"
+      class="streaming-dot"
+      catchtap="onStreamingTap"
+    >
+      <view class="streaming-pulse"></view>
+    </view>
+  </view>
+</view>

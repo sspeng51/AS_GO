@@ -1,0 +1,32 @@
+# 依赖
+node_modules/
+miniprogram_npm/
+
+# 环境变量与密钥（切勿提交）
+.env*
+!.env.example
+!**/.env.example
+private.key
+*.key
+*.pem
+*credentials*.json
+*secrets*.json
+
+# 构建产物
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+npm-debug.log*
+
+# 小程序打包忽略（已在 project.config.json 配置，此处冗余保险）

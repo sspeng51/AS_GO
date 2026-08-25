@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>砷智答 - 登录</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#43474e",
+                    "primary-container": "#1a365d",
+                    "on-secondary-fixed": "#171c20",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#4f2e00",
+                    "on-tertiary-fixed-variant": "#633f0f",
+                    "surface-tint": "#455f88",
+                    "background": "#faf9fd",
+                    "surface-dim": "#dad9dd",
+                    "surface-bright": "#faf9fd",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f1f0f4",
+                    "on-tertiary-container": "#c6955e",
+                    "on-secondary-container": "#5e6368",
+                    "surface-container": "#efedf1",
+                    "on-primary-fixed-variant": "#2d476f",
+                    "on-background": "#1a1c1e",
+                    "inverse-surface": "#2f3033",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed": "#dee3e8",
+                    "surface-container-high": "#e9e7eb",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#321b00",
+                    "tertiary-fixed": "#ffddba",
+                    "surface": "#faf9fd",
+                    "on-primary": "#ffffff",
+                    "primary-fixed": "#d6e3ff",
+                    "outline": "#74777f",
+                    "on-surface": "#1a1c1e",
+                    "inverse-primary": "#adc7f7",
+                    "secondary-container": "#dbe0e5",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#42474c",
+                    "on-primary-fixed": "#001b3c",
+                    "surface-container-low": "#f4f3f7",
+                    "primary-fixed-dim": "#adc7f7",
+                    "surface-variant": "#e3e2e6",
+                    "on-tertiary-fixed": "#2b1700",
+                    "secondary": "#595f63",
+                    "surface-container-highest": "#e3e2e6",
+                    "primary": "#002045",
+                    "tertiary-fixed-dim": "#f2bc82",
+                    "outline-variant": "#c4c6cf",
+                    "secondary-fixed-dim": "#c2c7cc",
+                    "on-primary-container": "#86a0cd"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "container-padding": "24px",
+                    "xl": "32px",
+                    "sm": "12px",
+                    "xs": "8px",
+                    "gutter": "16px",
+                    "md": "16px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Inter"],
+                    "h3": ["Inter"],
+                    "h2": ["Inter"],
+                    "h1": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h3": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                    "h2": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #faf9fd;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+<style>
+        body {
+          min-height: 100dvh;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-on-surface">
+<main class="flex-grow flex flex-col items-center px-lg pb-xl pt-24">
+<!-- Header / Logo Section -->
+<div class="flex flex-col items-center mb-12">
+<div class="w-20 h-20 bg-primary-container rounded-3xl flex items-center justify-center mb-md shadow-xl shadow-primary-container/10">
+<span class="material-symbols-outlined text-white text-5xl" data-icon="science">science</span>
+</div>
+<h1 class="font-h1 text-h1 text-primary-container mb-xs">砷智答</h1>
+<p class="font-body-md text-on-surface-variant opacity-70 tracking-wide">基于 RAG 的科学助手</p>
+</div>
+<!-- Auth & Action Card Container -->
+<div class="w-full max-w-md flex flex-col items-center justify-center flex-grow mb-12">
+<!-- Main Content Card -->
+<div class="w-full bg-surface-container-lowest rounded-3xl p-lg shadow-[0_8px_40px_-12px_rgba(26,54,93,0.08)] border border-surface-container-high/60">
+<div class="flex flex-col gap-md">
+<div class="flex items-center gap-sm mb-1">
+<div class="w-2 h-2 bg-[#DD6B20] rounded-full"></div>
+<span class="font-h3 text-h3 text-on-surface">砷智答 申请获取以下权限：</span>
+</div>
+<p class="font-body-md text-on-surface-variant flex items-center gap-xs ml-4">
+<span class="material-symbols-outlined text-[20px] text-primary" data-icon="check_circle">check_circle</span>
+                        获取您的昵称、头像
+                    </p>
+<!-- User Profile Preview -->
+<div class="bg-surface-container-low/50 rounded-2xl p-md mt-sm flex items-center justify-between border border-outline-variant/20 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-secondary-container shadow-inner">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="minimalist 3d render of a friendly human avatar with clean lighting and soft shadows on a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9efRr8GLTt1Yy4zsyGmI7bdTQP0VFcwb13XGlnXXHFal6NLa_3bVd-JhWgqBsrkLKTbE6QmzKQQtBWyW95XWsDl5tEz66Li26BCyL1Tls7UFFlR9fPnFiObbK1WswxM5mneI4L8AcHQ_pGzTXhm7JO-c-z9tyVimtRprST-eSA_vqpcnVa3M-NtaB69m9ZcWDZ2R1_8SCi3UHJJLPODxjZSIeFoVUkeZyt1pTPDxMmD8VOxD91Df-8I-Mjo5aSKyQDNxUj7VRr3ll"/>
+</div>
+<div class="flex flex-col">
+<span class="font-h3 text-[16px] leading-tight mb-0.5">微信用户</span>
+<span class="font-body-sm text-on-surface-variant opacity-80">点击以切换账号</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline/50" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Actions Integrated into spacing -->
+<div class="flex flex-col gap-md mt-lg">
+<button class="w-full bg-[#07C160] hover:bg-[#06ae56] active:scale-[0.98] transition-all py-3.5 rounded-2xl flex items-center justify-center gap-sm text-white font-h2 shadow-lg shadow-[#07C160]/20">
+<svg class="text-white" fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.35 1C6.63 1 2 5.17 2 10.3C2 13.25 3.51 15.86 5.86 17.51C5.59 18.52 4.96 20.35 4.96 20.35C4.96 20.35 7.15 19.98 9.38 18.56C10.32 18.82 11.31 18.96 12.35 18.96C18.07 18.96 22.7 14.79 22.7 9.66C22.7 4.53 18.07 1 12.35 1Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+                            微信一键登录
+                        </button>
+<button class="w-full font-h3 text-primary-container bg-secondary-container/20 hover:bg-secondary-container/40 py-3.5 rounded-2xl active:scale-[0.98] transition-all border border-secondary-container/30">
+                            手机号登录
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Privacy Policy -->
+<div class="mt-auto py-xl w-full max-w-md text-center">
+<label class="inline-flex items-start gap-xs cursor-pointer group text-left">
+<input checked="" class="mt-1 rounded-sm border-outline text-primary-container focus:ring-primary-container" type="checkbox"/>
+<span class="font-body-sm text-on-surface-variant leading-relaxed">
+                    登录即代表您同意
+                    <a class="text-primary-container font-medium hover:underline" href="#">《用户协议》</a>
+                    和
+                    <a class="text-primary-container font-medium hover:underline" href="#">《隐私政策》</a>
+</span>
+</label>
+</div>
+</main>
+<!-- Visual Decoration (Abstract Background Elements) -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-40">
+<div class="absolute top-[-10%] right-[-10%] w-[60%] h-[50%] bg-primary-fixed blur-[140px] rounded-full opacity-30"></div>
+<div class="absolute bottom-[-5%] left-[-5%] w-[50%] h-[40%] bg-tertiary-fixed blur-[120px] rounded-full opacity-20"></div>
+</div>
+</body></html>

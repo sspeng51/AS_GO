@@ -1,0 +1,106 @@
+<view class="login-container {{darkMode ? 'dark-theme' : ''}}">
+  <!-- 装饰背景 -->
+  <view class="bg-decoration">
+    <view class="bg-circle bg-circle-1"></view>
+    <view class="bg-circle bg-circle-2"></view>
+    <view class="bg-dots"></view>
+  </view>
+
+  <view class="login-content">
+
+    <!-- Logo -->
+    <view class="logo-section">
+      <view class="logo-icon">
+        <text class="logo-emoji">🔬</text>
+      </view>
+      <text class="app-title">砷智答</text>
+      <text class="app-subtitle">基于 RAG 的科学助手</text>
+    </view>
+
+    <!-- 授权卡片 -->
+    <view class="auth-card">
+      <view class="card-header">
+        <text class="card-title">授权登录</text>
+        <text class="card-subtitle">完善信息以获得更好的体验</text>
+      </view>
+
+      <!-- 头像 + 昵称 -->
+      <view class="profile-row">
+        <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" binderror="onAvatarBtnError">
+          <view class="avatar-ring {{userInfo.avatarUrl ? 'has-avatar' : ''}}">
+            <image
+              wx:if="{{userInfo.avatarUrl}}"
+              class="user-avatar"
+              src="{{userInfo.avatarUrl}}"
+              mode="aspectFill"
+              binderror="onAvatarError"
+            />
+            <view wx:else class="avatar-placeholder">
+              <text class="placeholder-icon">📷</text>
+            </view>
+          </view>
+        </button>
+
+        <view class="nickname-col">
+          <view class="field-label">
+            <text>昵称</text>
+            <text class="required-star">*</text>
+          </view>
+          <input
+            class="nickname-input"
+            type="nickname"
+            placeholder="请输入你的昵称"
+            value="{{userInfo.nickName}}"
+            bindinput="onNickNameInput"
+            maxlength="20"
+            placeholder-class="input-placeholder"
+          />
+          <view class="field-hint" wx:if="{{!userInfo.nickName}}">
+          </view>
+        </view>
+      </view>
+
+      <!-- 错误提示 -->
+      <view class="login-error" wx:if="{{loginError}}">
+        <text>{{loginError}}</text>
+      </view>
+
+      <!-- 登录按钮 -->
+      <button
+        class="btn-login {{loading || !canLogin ? 'disabled' : ''}}"
+        bindtap="onWechatLogin"
+        disabled="{{loading || !canLogin}}"
+        loading="{{loading}}"
+      >
+        <text wx:if="{{!loading}}">登录</text>
+      </button>
+
+      <!-- 分割 + 游客 -->
+      <view class="divider-row">
+        <view class="divider-line"></view>
+        <text class="divider-text">或</text>
+        <view class="divider-line"></view>
+      </view>
+      <view class="guest-entry" bindtap="onGuestEntry">
+        <text>暂不登录，游客体验</text>
+      </view>
+    </view>
+
+    <!-- 隐私协议 -->
+    <view class="privacy-section">
+      <checkbox-group bindchange="onAgreeChange">
+        <label class="privacy-label">
+          <checkbox value="agree" checked="{{agreePrivacy}}" color="#0A3D62"/>
+          <text class="privacy-text">我已阅读并同意<text catchtap="onViewAgreement" class="privacy-link">《用户协议》</text>和<text catchtap="onViewPrivacy" class="privacy-link">《隐私政策》</text>
+          </text>
+        </label>
+      </checkbox-group>
+    </view>
+
+    <!-- 安全提示 -->
+    <view class="safe-hint">
+      <text class="safe-icon">🔒</text>
+      <text class="safe-text">数据安全加密，仅用于改善 AI 服务体验</text>
+    </view>
+  </view>
+</view>

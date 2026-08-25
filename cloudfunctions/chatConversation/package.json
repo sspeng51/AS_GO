@@ -1,0 +1,9 @@
+{
+  "name": "chatConversation",
+  "version": "1.0.0",
+  "description": "用户对话存储与查询云函数 - 专为后台管理系统提供对话数据的CRUD服务",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

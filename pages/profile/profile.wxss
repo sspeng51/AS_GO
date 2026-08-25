@@ -1,0 +1,655 @@
+/* ============================================================
+   个人中心 - 完整样式表
+   设计规范：主色 #0A3D62 · 辅助 #1a365d · 背景 #f5f7fa
+   响应式：基于 rpx 单位，适配各种屏幕
+   ============================================================ */
+
+/* ---------- 页面级 ---------- */
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7fa;
+}
+
+.profile-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7fa;
+  padding-top: 24rpx;
+  padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   用户信息卡片
+   ============================================================ */
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin: 0 28rpx 24rpx;
+  padding: 32rpx 28rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.user-card-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-card-avatar-img {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  display: block;
+}
+
+.user-card-avatar-placeholder {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-placeholder-icon {
+  font-size: 56rpx;
+}
+
+.user-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.user-card-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1c1e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-card-id {
+  font-size: 22rpx;
+  color: #94a3b8;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-card-bio {
+  font-size: 24rpx;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-card-edit {
+  flex-shrink: 0;
+  padding: 12rpx 28rpx;
+  border-radius: 32rpx;
+  border: 2rpx solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.user-card-edit:active {
+  background: #f1f5f9;
+}
+
+.edit-btn-text {
+  font-size: 26rpx;
+  color: #0A3D62;
+  font-weight: 500;
+}
+
+/* 深色模式用户卡片 */
+.dark-theme .user-card {
+  background: #1e293b;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .user-card-name {
+  color: #e2e8f0;
+}
+
+.dark-theme .user-card-id {
+  color: #64748b;
+}
+
+.dark-theme .user-card-bio {
+  color: #94a3b8;
+}
+
+.dark-theme .user-card-edit {
+  border-color: #475569;
+}
+
+.dark-theme .edit-btn-text {
+  color: #93c5fd;
+}
+
+.dark-theme .user-card-avatar-placeholder {
+  background: linear-gradient(135deg, #334155 0%, #475569 100%);
+}
+
+/* ============================================================
+   3. 通用区块 & 菜单列表
+   ============================================================ */
+.section-block {
+  margin: 0 28rpx 24rpx;
+}
+
+.section-header {
+  padding: 0 12rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.section-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.section-desc {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+.menu-list {
+  background: #ffffff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 28rpx;
+  gap: 20rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+  transition: background 0.2s ease;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item:active {
+  background: #f8fafc;
+}
+
+.menu-icon-wrap {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.menu-icon {
+  font-size: 34rpx;
+}
+
+/* 各图标颜色 */
+.icon-profile  { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); }
+.icon-contact  { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); }
+.icon-email    { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
+.icon-theme    { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
+.icon-feedback { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); }
+.icon-cache    { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); }
+
+.menu-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.menu-label {
+  font-size: 29rpx;
+  font-weight: 600;
+  color: #1a1c1e;
+}
+
+.menu-value {
+  font-size: 23rpx;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-arrow {
+  font-size: 44rpx;
+  color: #cbd5e1;
+  font-weight: 300;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   4. 退出登录
+   ============================================================ */
+.logout-section {
+  margin: 20rpx 28rpx 40rpx;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx;
+  background: #ffffff;
+  border: 2rpx solid #fecaca;
+  border-radius: 24rpx;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.logout-btn:active {
+  background: #fef2f2;
+  transform: scale(0.98);
+}
+
+.logout-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #dc2626;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   5. 弹窗通用样式
+   ============================================================ */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-mask.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-container {
+  width: 100%;
+  max-height: 85vh;
+  background: #ffffff;
+  border-radius: 40rpx 40rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-mask.show .modal-container {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1c1e;
+}
+
+.modal-cancel {
+  font-size: 28rpx;
+  color: #64748b;
+  padding: 8rpx 16rpx;
+}
+
+.modal-confirm {
+  font-size: 28rpx;
+  color: #0A3D62;
+  font-weight: 700;
+  padding: 8rpx 16rpx;
+}
+
+.modal-body {
+  flex: 1;
+  padding: 24rpx 32rpx 48rpx;
+  overflow-y: auto;
+}
+
+/* ============================================================
+   6. 编辑资料弹窗
+   ============================================================ */
+.form-group {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 88rpx;
+  background: #f8fafc;
+  border: 2rpx solid #e8ecf0;
+  border-radius: 20rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #1a1c1e;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: #0A3D62;
+  background: #ffffff;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 140rpx;
+  background: #f8fafc;
+  border: 2rpx solid #e8ecf0;
+  border-radius: 20rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: #1a1c1e;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.form-textarea:focus {
+  border-color: #0A3D62;
+  background: #ffffff;
+}
+
+.avatar-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.avatar-picker-btn {
+  position: relative;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  line-height: 1;
+}
+
+.avatar-picker-btn::after {
+  border: none;
+}
+
+.edit-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #f0f4f8;
+}
+
+.avatar-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48rpx;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-overlay text {
+  font-size: 22rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* ============================================================
+   7. 反馈弹窗
+   ============================================================ */
+.category-options {
+  display: flex;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+
+.category-option {
+  padding: 14rpx 28rpx;
+  border-radius: 20rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.category-option.active {
+  color: #0A3D62;
+  background: #e0f2fe;
+  border-color: #0A3D62;
+  font-weight: 600;
+}
+
+.score-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+
+.score-option {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.score-option.active {
+  color: #fff;
+  background: #0A3D62;
+  border-color: #0A3D62;
+  transform: scale(1.1);
+}
+
+.score-hint {
+  margin-top: 8rpx;
+}
+
+.feedback-textarea {
+  min-height: 240rpx;
+}
+
+.form-hint {
+  display: block;
+  text-align: right;
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 8rpx;
+}
+
+/* ============================================================
+   8. 响应式适配
+   ============================================================ */
+
+/* 平板/大屏适配 */
+@media (min-width: 768px) {
+  .section-block {
+    margin-left: 60rpx;
+    margin-right: 60rpx;
+  }
+}
+
+/* 小屏手机适配 */
+@media (max-width: 320px) {
+  .menu-item {
+    padding: 24rpx 22rpx;
+    gap: 16rpx;
+  }
+
+  .menu-icon-wrap {
+    width: 66rpx;
+    height: 66rpx;
+  }
+}
+
+/* ============================================================
+   9. 深色模式适配
+   ============================================================ */
+.dark-theme .profile-container {
+  background-color: #0f172a;
+}
+
+.dark-theme .section-header .section-title {
+  color: #94a3b8;
+}
+
+.dark-theme .section-header .section-desc {
+  color: #64748b;
+}
+
+.dark-theme .menu-list,
+.dark-theme .modal-container,
+.dark-theme .logout-btn {
+  background: #1e293b;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .menu-item {
+  border-color: #334155;
+}
+
+.dark-theme .menu-item:active {
+  background: #1a2538;
+}
+
+.dark-theme .menu-label,
+.dark-theme .modal-title {
+  color: #e2e8f0;
+}
+
+.dark-theme .menu-value {
+  color: #64748b;
+}
+
+.dark-theme .menu-arrow {
+  color: #475569;
+}
+
+.dark-theme .form-input,
+.dark-theme .form-textarea {
+  background: #334155;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+.dark-theme .form-input:focus,
+.dark-theme .form-textarea:focus {
+  border-color: #3b82f6;
+  background: #1e293b;
+}
+
+.dark-theme .form-label {
+  color: #94a3b8;
+}
+
+.dark-theme .modal-header {
+  border-color: #334155;
+}
+
+.dark-theme .modal-cancel {
+  color: #94a3b8;
+}
+
+.dark-theme .modal-confirm {
+  color: #60a5fa;
+}
+
+.dark-theme .logout-btn {
+  border-color: #7f1d1d;
+}
+
+.dark-theme .modal-mask {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.dark-theme .category-option {
+  background: #334155;
+  color: #94a3b8;
+}
+
+.dark-theme .category-option.active {
+  color: #60a5fa;
+  background: #1a365d;
+  border-color: #60a5fa;
+}
+
+.dark-theme .score-option {
+  background: #334155;
+  color: #94a3b8;
+}
+
+.dark-theme .score-option.active {
+  color: #fff;
+  background: #60a5fa;
+  border-color: #60a5fa;
+}
+
+.dark-theme .form-hint {
+  color: #64748b;
+}

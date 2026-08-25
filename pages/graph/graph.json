@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "知识图谱",
+  "navigationBarBackgroundColor": "#ffffff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#faf9fd",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "ec-canvas": "/components/ec-canvas/ec-canvas",
+    "tab-bar": "/components/tab-bar/tab-bar"
+  }
+}

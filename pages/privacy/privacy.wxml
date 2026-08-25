@@ -1,0 +1,94 @@
+<view class="page-container {{darkMode ? 'dark-theme' : ''}}">
+  <view class="content-wrapper">
+    <view class="section">
+    </view>
+
+    <view class="section">
+      <text class="section-text">"砷智答"小程序（以下简称"我们"）高度重视用户的个人信息和隐私保护。本《隐私政策》旨在向您说明我们如何收集、使用、存储和保护您的个人信息。请您在使用本小程序前仔细阅读本政策，确认充分理解并同意后再开始使用。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">一、我们收集的信息</text>
+      <text class="section-text">1.1 在您使用本小程序的过程中，我们可能会收集以下信息：</text>
+      <text class="section-text subsection-title">（一）您主动提供的信息</text>
+      <text class="section-text">- 微信昵称和头像：当您授权登录时，我们会获取您的微信昵称和头像，用于在对话界面和反馈中展示您的身份。</text>
+      <text class="section-text">- 反馈内容：当您提交问题反馈、评分或意见时，我们会收集您填写的内容。</text>
+      <text class="section-text subsection-title">（二）自动收集的信息</text>
+      <text class="section-text">- 对话记录：您与AI助手的问答内容，用于提供服务和优化AI模型。</text>
+      <text class="section-text">- 设备信息：设备型号、操作系统版本、微信版本等，用于适配和优化服务。</text>
+      <text class="section-text">- 日志信息：包括访问时间、使用时长、功能使用频率等，用于分析服务质量和改进用户体验。</text>
+      <text class="section-text subsection-title">（三）游客模式</text>
+      <text class="section-text">- 当您以游客模式使用本小程序时，我们仅收集对话内容和使用日志，不获取您的微信个人信息。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">二、我们如何使用信息</text>
+      <text class="section-text">2.1 我们收集的信息将用于以下目的：</text>
+      <text class="section-text">（1）提供、维护和优化AI智能问答服务；</text>
+      <text class="section-text">（2）改进AI模型回答质量，提升专业领域知识的准确性；</text>
+      <text class="section-text">（3）分析用户使用习惯和需求，优化产品功能和用户体验；</text>
+      <text class="section-text">（4）处理用户反馈和投诉，改进服务质量；</text>
+      <text class="section-text">（5）保障服务安全，防范安全风险和欺诈行为；</text>
+      <text class="section-text">（6）遵守法律法规的要求。</text>
+      <text class="section-text">2.2 我们不会将收集的信息用于本政策未载明的其他用途，除非事先征得您的明确同意。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">三、信息的存储与保护</text>
+      <text class="section-text">3.1 您的个人信息和对话数据将存储在微信云开发平台的安全服务器上，我们采用业界通行的安全技术和措施保护您的数据安全。</text>
+      <text class="section-text">3.2 我们采取以下安全措施保护您的信息：</text>
+      <text class="section-text">（1）数据传输采用HTTPS加密协议；</text>
+      <text class="section-text">（2）数据存储采用加密方式保护；</text>
+      <text class="section-text">（3）严格控制数据访问权限，仅授权人员可接触相关数据；</text>
+      <text class="section-text">（4）定期进行安全审计和漏洞扫描。</text>
+      <text class="section-text">3.3 尽管我们采取了上述安全措施，但请注意互联网环境并非绝对安全，我们会尽力保护您的个人信息，但无法保证100%的安全性。</text>
+      <text class="section-text">3.4 我们仅在实现本政策所述目的所需的期限内保留您的个人信息，法律法规另有规定的除外。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">四、信息的共享与披露</text>
+      <text class="section-text">4.1 我们不会将您的个人信息出售或分享给任何第三方，除非：</text>
+      <text class="section-text">（1）获得您的明确同意或授权；</text>
+      <text class="section-text">（2）根据法律法规、行政或司法机关的要求所必需；</text>
+      <text class="section-text">（3）为保护我们的合法权益所必需；</text>
+      <text class="section-text">（4）为维护社会公共利益所必需。</text>
+      <text class="section-text">4.2 我们可能使用第三方云服务（如微信云开发）来存储和处理数据。这些服务提供商仅在提供服务所必需的范围内接触您的信息，并承担相应的保密义务。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">五、您的权利</text>
+      <text class="section-text">5.1 您对您的个人信息享有以下权利：</text>
+      <text class="section-text">（1）查阅权：您可以在"我的"页面查看您的个人信息；</text>
+      <text class="section-text">（2）更正权：您可以编辑修改您的昵称、头像等信息；</text>
+      <text class="section-text">（3）删除权：您可以清空历史对话记录，也可以联系我们删除您的账号信息；</text>
+      <text class="section-text">（4）撤回同意权：您可以随时撤回对个人信息收集的同意，但这可能导致部分功能无法正常使用；</text>
+      <text class="section-text">（5）注销权：您可以联系我们注销账号，我们将在验证身份后及时处理。</text>
+      <text class="section-text">5.2 如您需要行使上述权利，请通过本小程序内的反馈渠道或第九条所列联系方式与我们联系。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">六、未成年人保护</text>
+      <text class="section-text">6.1 本小程序主要面向从事铜冶炼及相关行业的专业人员，不面向未成年人提供服务。</text>
+      <text class="section-text">6.2 如您为未成年人，请在监护人的同意和指导下使用本小程序。如我们发现在未获监护人同意的情况下收集了未成年人个人信息，将尽快删除相关数据。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">七、Cookie及同类技术</text>
+      <text class="section-text">7.1 本小程序作为微信小程序，不使用Cookie技术。但微信平台可能会使用必要的技术手段（如本地存储Storage）来缓存部分数据，以提升您的使用体验。</text>
+      <text class="section-text">7.2 您可以通过微信的设置管理相关权限，但清除缓存数据可能影响部分功能的使用体验。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">八、隐私政策的更新</text>
+      <text class="section-text">8.1 我们可能会根据法律法规变化、业务发展需要等适时更新本隐私政策。</text>
+      <text class="section-text">8.2 更新后的隐私政策将在本小程序内公布，并在更新日期生效。重大变更我们可能会通过弹窗等方式进行显著提示。</text>
+      <text class="section-text">8.3 您在隐私政策更新后继续使用本小程序，即表示您已充分阅读、理解并同意更新后的隐私政策。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">九、联系我们</text>
+      <text class="section-text">如您对本隐私政策有任何疑问、意见或建议，或者需要行使您的个人信息权利，请通过以下方式联系我们：</text>
+      <text class="section-text">小程序内反馈入口：进入"我的"页面 → 点击"意见反馈"</text>
+    </view>
+  </view>
+</view>

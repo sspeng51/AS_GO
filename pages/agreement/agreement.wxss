@@ -1,0 +1,55 @@
+.page-container {
+  min-height: 100vh;
+  background: #faf9fd;
+  padding: 0;
+}
+
+.content-wrapper {
+  padding: 32rpx 36rpx 80rpx;
+}
+
+.section {
+  margin-bottom: 36rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a365d;
+  margin-bottom: 16rpx;
+  line-height: 1.5;
+}
+
+.section-text {
+  display: block;
+  font-size: 27rpx;
+  color: #475569;
+  line-height: 1.85;
+  margin-bottom: 10rpx;
+  text-align: justify;
+}
+
+.update-date {
+  display: block;
+  font-size: 24rpx;
+  color: #94a3b8;
+  line-height: 1.8;
+}
+
+/* ===== 深色模式 ===== */
+.dark-theme.page-container {
+  background: #0f172a;
+}
+
+.dark-theme .section-title {
+  color: #e2e8f0;
+}
+
+.dark-theme .section-text {
+  color: #94a3b8;
+}
+
+.dark-theme .update-date {
+  color: #64748b;
+}

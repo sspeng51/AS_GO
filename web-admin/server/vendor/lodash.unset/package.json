@@ -1,0 +1,9 @@
+{
+  "name": "lodash.unset",
+  "version": "5.0.0-security-shim",
+  "main": "index.js",
+  "private": true,
+  "peerDependencies": {
+    "lodash": ">=4.17.21"
+  }
+}

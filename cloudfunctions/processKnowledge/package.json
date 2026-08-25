@@ -1,0 +1,25 @@
+{
+  "name": "processKnowledge",
+  "version": "2.2.0",
+  "description": "公共知识库系统 - 基于智谱托管知识库的 RAG 后端服务，包含权限控制、审计日志和数据备份功能",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "timeout": 120,
+  "memorySize": 512,
+  "dependencies": {
+    "mammoth": "^1.7.0",
+    "neo4j-driver": "^5.28.3",
+    "pdf-parse": "^1.1.1",
+    "wx-server-sdk": "~2.6.3"
+  },
+  "keywords": [
+    "public-kb",
+    "rag",
+    "audit-log",
+    "permission-control"
+  ],
+  "author": "",
+  "license": "ISC"
+}

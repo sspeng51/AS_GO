@@ -1,0 +1,78 @@
+<view class="page-container {{darkMode ? 'dark-theme' : ''}}">
+  <view class="content-wrapper">
+    <view class="section">
+    </view>
+    <view class="section">
+      <text class="section-text">欢迎使用"砷智答"小程序（以下简称"本小程序"）。在您使用本小程序前，请仔细阅读本《用户协议》（以下简称"本协议"）。您通过点击"同意"按钮或实际使用本小程序，即表示您已阅读、理解并同意接受本协议的全部条款。如您不同意本协议任何条款，请勿使用本小程序。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">一、服务说明</text>
+      <text class="section-text">1.1 本小程序是一个专注于"铜冶炼过程中砷的资源化利用"领域的智能问答助手，为用户提供基于人工智能和大语言模型技术的专业问答服务。</text>
+      <text class="section-text">1.2 本小程序提供的AI回答内容仅供参考，不构成任何形式的专业建议、技术方案或决策依据。用户在做出任何技术决策或生产操作前，应当结合实际情况咨询专业技术人员。</text>
+      <text class="section-text">1.3 本小程序保留在不事先通知的情况下，随时修改、暂停或终止部分或全部服务的权利，且不对此承担任何责任。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">二、用户注册与账号</text>
+      <text class="section-text">2.1 您可以通过微信授权登录使用本小程序。您应当提供真实、准确的个人信息，并在信息变更时及时更新。</text>
+      <text class="section-text">2.2 您应对您的账号安全负责，妥善保管账号信息，不得将账号转让、出借或与他人共享使用。</text>
+      <text class="section-text">2.3 如发现任何未经授权使用您账号的情况，应立即通知我们。对于因您账号被他人使用而造成的任何损失，我们不承担责任。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">三、用户行为规范</text>
+      <text class="section-text">3.1 您在使用本小程序时，应遵守中华人民共和国相关法律法规，不得利用本小程序从事以下行为：</text>
+      <text class="section-text">（1）发布、传播违反法律法规、危害国家安全、破坏民族团结、扰乱社会秩序的内容；</text>
+      <text class="section-text">（2）发布、传播淫秽、色情、赌博、暴力、恐怖或教唆犯罪的内容；</text>
+      <text class="section-text">（3）侮辱、诽谤他人，侵害他人合法权益；</text>
+      <text class="section-text">（4）利用技术手段恶意攻击、干扰本小程序的正常运行；</text>
+      <text class="section-text">（5）未经授权收集、使用、存储其他用户的个人信息；</text>
+      <text class="section-text">（6）其他违反法律法规或公序良俗的行为。</text>
+      <text class="section-text">3.2 如您违反上述规定，我们有权采取删除违规内容、暂停或终止服务、封禁账号等措施，并保留追究法律责任的权利。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">四、知识产权</text>
+      <text class="section-text">4.1 本小程序的所有内容，包括但不限于文字、图片、图标、界面设计、程序代码、数据等，均受知识产权法律法规保护。未经权利人书面许可，您不得以任何方式复制、修改、传播、出版或用于商业目的。</text>
+      <text class="section-text">4.2 您在使用本小程序过程中产生的问答内容，本小程序有权在不泄露您个人信息的前提下，用于改进服务质量、优化AI模型及数据分析。</text>
+      <text class="section-text">4.3 您通过本小程序上传或发布的内容，您应保证对该内容拥有合法的权利，不侵犯任何第三方的知识产权。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">五、免责声明</text>
+      <text class="section-text">5.1 本小程序的AI回答内容由人工智能模型生成，可能存在不准确、不完整或过时的情况。我们不对回答内容的准确性、完整性、可靠性、适用性做出任何明示或默示的保证。</text>
+      <text class="section-text">5.2 您在使用本小程序提供的任何信息或建议后所产生的任何后果，包括但不限于生产事故、安全事件、经济损失等，均由您自行承担，我们不承担任何责任。</text>
+      <text class="section-text">5.3 因不可抗力、网络故障、系统维护、第三方服务中断等原因导致的服务中断或数据丢失，我们不承担任何责任。</text>
+      <text class="section-text">5.4 本小程序特别提示：砷及其化合物具有毒性，涉及砷的工艺操作、废物处理等必须严格遵守相关安全规范和环保法规。本小程序提供的信息仅供技术参考，不代替专业安全培训和操作规范。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">六、服务的变更、中断与终止</text>
+      <text class="section-text">6.1 我们有权根据业务发展需要，随时调整、变更或终止本小程序的部分或全部功能。</text>
+      <text class="section-text">6.2 如发生以下情形，我们有权不经通知暂停或终止对您提供服务：</text>
+      <text class="section-text">（1）您违反本协议的任何条款；</text>
+      <text class="section-text">（2）根据法律法规或监管要求必须终止服务；</text>
+      <text class="section-text">（3）您长期未使用本小程序。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">七、法律适用与争议解决</text>
+      <text class="section-text">7.1 本协议的订立、执行、解释及争议解决均适用中华人民共和国法律。</text>
+      <text class="section-text">7.2 因本协议引起的或与之相关的任何争议，双方应友好协商解决；协商不成的，任何一方均有权向有管辖权的人民法院提起诉讼。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">八、其他</text>
+      <text class="section-text">8.1 本协议构成双方就本小程序使用的完整协议，取代之前的所有口头或书面约定。</text>
+      <text class="section-text">8.2 如本协议的任何条款被认定为无效或不可执行，该条款应按法律允许的最大限度执行，其余条款的效力不受影响。</text>
+      <text class="section-text">8.3 我们有权根据法律法规变化或业务需要，随时修改本协议。修改后的协议将在本小程序公布即生效，您继续使用本小程序即视为同意修改后的协议。</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">九、联系方式</text>
+      <text class="section-text">如您对本协议有任何疑问、意见或建议，请通过以下方式联系我们：</text>
+      <text class="section-text">小程序内反馈入口：进入"我的"页面 → 点击"意见反馈"</text>
+    </view>
+  </view>
+</view>

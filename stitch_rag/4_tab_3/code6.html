@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#dbe0e5",
+                    "on-tertiary-fixed": "#2b1700",
+                    "on-secondary": "#ffffff",
+                    "surface-container-low": "#f4f3f7",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#dad9dd",
+                    "primary": "#002045",
+                    "on-surface": "#1a1c1e",
+                    "on-primary-fixed": "#001b3c",
+                    "surface-container-highest": "#e3e2e6",
+                    "secondary-fixed-dim": "#c2c7cc",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#43474e",
+                    "primary-fixed": "#d6e3ff",
+                    "inverse-on-surface": "#f1f0f4",
+                    "surface-tint": "#455f88",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#2d476f",
+                    "inverse-surface": "#2f3033",
+                    "tertiary-fixed": "#ffddba",
+                    "on-secondary-container": "#5e6368",
+                    "on-primary-container": "#86a0cd",
+                    "tertiary-fixed-dim": "#f2bc82",
+                    "surface-variant": "#e3e2e6",
+                    "outline": "#74777f",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#faf9fd",
+                    "outline-variant": "#c4c6cf",
+                    "surface-container": "#efedf1",
+                    "secondary-fixed": "#dee3e8",
+                    "background": "#faf9fd",
+                    "secondary": "#595f63",
+                    "on-secondary-fixed": "#171c20",
+                    "inverse-primary": "#adc7f7",
+                    "on-tertiary-container": "#c6955e",
+                    "surface-container-high": "#e9e7eb",
+                    "on-secondary-fixed-variant": "#42474c",
+                    "tertiary": "#321b00",
+                    "on-background": "#1a1c1e",
+                    "tertiary-container": "#4f2e00",
+                    "primary-fixed-dim": "#adc7f7",
+                    "on-tertiary-fixed-variant": "#633f0f",
+                    "surface": "#faf9fd",
+                    "on-error": "#ffffff",
+                    "primary-container": "#1a365d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "container-padding": "24px",
+                    "xs": "8px",
+                    "base": "4px",
+                    "sm": "12px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Inter"],
+                    "body-md": ["Inter"],
+                    "h3": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "h1": ["Inter"],
+                    "h2": ["Inter"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "h3": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "h2": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #faf9fd; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-4 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm z-40">
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors active:opacity-70">
+<span class="material-symbols-outlined text-blue-900 dark:text-blue-400">menu</span>
+</button>
+<h1 class="text-blue-900 dark:text-blue-100 font-bold text-xl">硵智答</h1>
+</div>
+<button class="p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors active:opacity-70">
+<span class="material-symbols-outlined text-blue-900 dark:text-blue-400">notifications</span>
+</button>
+</header>
+<main class="pt-20 px-4 max-w-2xl mx-auto space-y-lg">
+<!-- Profile Section -->
+<section class="bg-white dark:bg-slate-900 rounded-xl p-lg shadow-[0px_4px_12px_rgba(26,54,93,0.08)] border border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-md">
+<div class="relative">
+<img class="w-20 h-20 rounded-full object-cover border-2 border-primary-fixed" data-alt="Professional headshot of a research scientist in a minimalist studio setting with clean blue background lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByfbcoAkeYXmm2rETSYdd14Xcej6edAXcx-o3LvfT-E2Tbuuuqs7JTrclwYkMPrazIUoVtOBos0YpG1kB7MuuOnRyzCTVvYNBV-KUZhVlDxGt9FLIhT6UAqURr0aTxiwH2hekIfRQUbHyNvWjfVMbkoJ14Svnat5i32bkTmbTVusMxLi3oUHJUyz0r40ydpkVdf1_0Be8gVHZdAf3ynyvKqk2Zm5JsvABObOdmo4Z06cxgGtnpZANiTn72M2JGpbFjmGIPFVDmPITM"/>
+<div class="absolute bottom-0 right-0 bg-primary text-white p-1 rounded-full border-2 border-white">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+</div>
+</div>
+<div class="flex-1">
+<h2 class="font-h1 text-h1 text-on-surface">林明远 博士</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">高级材料研究员 · 硵元素实验室</p>
+</div>
+<button class="p-2 text-primary">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</section>
+<!-- Stats Grid (Bento Style) -->
+<div class="grid grid-cols-2 gap-md">
+<div class="bg-primary-container text-white p-md rounded-xl space-y-xs">
+<span class="material-symbols-outlined text-on-primary-container">science</span>
+<p class="font-label-caps text-label-caps opacity-80">研究课题</p>
+<p class="font-h1 text-h1">128 <span class="text-sm font-normal">个</span></p>
+</div>
+<div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-md rounded-xl space-y-xs shadow-sm">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<p class="font-label-caps text-label-caps text-on-surface-variant">查询频率</p>
+<p class="font-h1 text-h1 text-primary">4.2 <span class="text-sm font-normal text-on-surface-variant">次/日</span></p>
+</div>
+<div class="col-span-2 bg-secondary-container p-md rounded-xl flex justify-between items-center border border-slate-200">
+<div class="flex items-center gap-sm">
+<div class="bg-white p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">workspace_premium</span>
+</div>
+<div>
+<p class="font-h3 text-h3 text-on-surface">知识图谱贡献</p>
+<p class="font-body-sm text-body-sm text-on-secondary-container">位于全国前 2% 的研究者</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-secondary-container">chevron_right</span>
+</div>
+</div>
+<!-- Settings List -->
+<section class="space-y-sm">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant px-1 uppercase tracking-widest">系统设置</h3>
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
+<!-- Dark Mode Toggle -->
+<div class="flex items-center justify-between p-md border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">dark_mode</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">深色模式</span>
+</div>
+<div class="w-12 h-6 bg-slate-200 dark:bg-primary-container rounded-full relative p-1 cursor-pointer">
+<div class="w-4 h-4 bg-white rounded-full shadow-sm transform translate-x-0 dark:translate-x-6 transition-transform"></div>
+</div>
+</div>
+<!-- Clear Cache -->
+<div class="flex items-center justify-between p-md border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">mop</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">清除本地缓存</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">248 MB</span>
+</div>
+<!-- Security -->
+<div class="flex items-center justify-between p-md hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">lock</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">实验室数据安全</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Danger Zone -->
+<section class="pb-lg">
+<button class="w-full flex items-center justify-center gap-sm p-md rounded-xl border border-error-container text-error font-h3 hover:bg-error-container/20 transition-colors">
+<span class="material-symbols-outlined">logout</span>
+                退出当前账户
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full h-20 bg-white dark:bg-slate-950 flex justify-around items-center pb-safe px-2 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_rgba(26,54,93,0.05)] z-50">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[11px] font-medium tracking-wide">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">library_books</span>
+<span class="text-[11px] font-medium tracking-wide">知识库</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-[11px] font-medium tracking-wide">知识图谱</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-900 dark:text-blue-300 font-bold scale-105 transition-transform active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-[11px] font-medium tracking-wide">个人中心</span>
+</a>
+</nav>
+</body></html>

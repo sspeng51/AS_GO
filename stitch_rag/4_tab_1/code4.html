@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#dbe0e5",
+                        "on-tertiary-fixed": "#2b1700",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f4f3f7",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#dad9dd",
+                        "primary": "#002045",
+                        "on-surface": "#1a1c1e",
+                        "on-primary-fixed": "#001b3c",
+                        "surface-container-highest": "#e3e2e6",
+                        "secondary-fixed-dim": "#c2c7cc",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#43474e",
+                        "primary-fixed": "#d6e3ff",
+                        "inverse-on-surface": "#f1f0f4",
+                        "surface-tint": "#455f88",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#2d476f",
+                        "inverse-surface": "#2f3033",
+                        "tertiary-fixed": "#ffddba",
+                        "on-secondary-container": "#5e6368",
+                        "on-primary-container": "#86a0cd",
+                        "tertiary-fixed-dim": "#f2bc82",
+                        "surface-variant": "#e3e2e6",
+                        "outline": "#74777f",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#faf9fd",
+                        "outline-variant": "#c4c6cf",
+                        "surface-container": "#efedf1",
+                        "secondary-fixed": "#dee3e8",
+                        "background": "#faf9fd",
+                        "secondary": "#595f63",
+                        "on-secondary-fixed": "#171c20",
+                        "inverse-primary": "#adc7f7",
+                        "on-tertiary-container": "#c6955e",
+                        "surface-container-high": "#e9e7eb",
+                        "on-secondary-fixed-variant": "#42474c",
+                        "tertiary": "#321b00",
+                        "on-background": "#1a1c1e",
+                        "tertiary-container": "#4f2e00",
+                        "primary-fixed-dim": "#adc7f7",
+                        "on-tertiary-fixed-variant": "#633f0f",
+                        "surface": "#faf9fd",
+                        "on-error": "#ffffff",
+                        "primary-container": "#1a365d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "container-padding": "24px",
+                        "xs": "8px",
+                        "base": "4px",
+                        "sm": "12px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "body-md": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "h1": ["Inter"],
+                        "h2": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "h3": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "h2": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #faf9fd;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-4 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-40 border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-blue-900 dark:text-blue-400 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-full">menu</button>
+<h1 class="text-blue-900 dark:text-blue-100 font-bold text-xl tracking-tight">研智答</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-slate-500 dark:text-slate-400 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-full">search</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-primary-container border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="professional portrait of a male scientist in a clean laboratory setting with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1Oof-9CeNC8oUrFRqWI0Gtohw2AaaUpJUjNCL-dN6BSlb4k62OE_-4HS8DQOH52BO0KjewM6so60CATxPXGO6cmcdZ7IC68Q0XIQp5zFvG9IZNbgQi_0Af7xgkZmw2ZivEFvg5-wsnVnmBWUzI5s0pkdR7uTPgKN2pr27sHWzFzm0E8gO4IYOVq2lNTiyShzS9UNRbXNewrZdDsyDZKj_Mo40Sh_qwPClew6LATKovYAYKbewqK6tvXzGs9RBcQs7MlAa_TObXIwu"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-24 px-4 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- Sidebar Navigation (Drawer Desktop) -->
+<aside class="hidden lg:flex lg:col-span-3 flex-col h-[calc(100vh-120px)] sticky top-24 bg-slate-50 dark:bg-slate-900 rounded-xl shadow-sm p-4 overflow-y-auto">
+<div class="text-blue-950 dark:text-white font-bold text-lg px-2 py-4">历史记录</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-300 border-r-4 border-blue-900 transition-all duration-300">
+<span class="material-symbols-outlined">history</span>
+<span class="font-sans text-sm font-medium">关于硼元素的定性分析</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300">
+<span class="material-symbols-outlined">science</span>
+<span class="font-sans text-sm font-medium">化合物合成路径研究</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-sans text-sm font-medium">历史查询记录 2023-10</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300">
+<span class="material-symbols-outlined">security</span>
+<span class="font-sans text-sm font-medium">实验室安全规程</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300">
+<span class="material-symbols-outlined">forum</span>
+<span class="font-sans text-sm font-medium">智能问答汇总</span>
+</a>
+</nav>
+</aside>
+<!-- Primary Feed Area -->
+<div class="lg:col-span-9 space-y-lg">
+<!-- Search Section -->
+<section class="relative bg-primary-container rounded-xl p-lg overflow-hidden shadow-lg border border-primary/20">
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<img class="w-full h-full object-cover" data-alt="abstract scientific blueprint with geometric molecular structures and lines in deep blue and orange" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4SN-W7vqBoYt2sfn5Wrz0C6UfJMyt_WtzQFYfCyGqZBykXmdUWCLPi7JTt2mAb2HP6MjVis0AgqmkrHKAOnDMvhVzIWt_PQllx8jhrR3p_s7fLpertVAHwZSlboUSHLUjuRhxqBkjbNWS9SYjnqQmLL_DxK_v9pcNUbYUG4HciPjhvPmS4A_1Ajde2spTk1vRy8cXpBE9PjiUzEklXFfmAEeUBCHj-eMAuXXA9GmhRO-_MxEgP-q6SsjuOaJowx70nl5TyYZzv6GI"/>
+</div>
+<div class="relative z-10 space-y-md">
+<h2 class="font-h1 text-h1 text-white">科研知识库检索</h2>
+<div class="flex items-center bg-white dark:bg-slate-800 rounded-xl p-1.5 border-2 border-transparent focus-within:border-tertiary-container transition-all">
+<span class="material-symbols-outlined px-3 text-slate-400">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-body-md py-2" placeholder="搜索化合物、文献、实验报告..." type="text"/>
+<button class="bg-primary text-white px-6 py-2 rounded-lg font-label-caps text-label-caps hover:bg-opacity-90 transition-all">搜索</button>
+</div>
+</div>
+</section>
+<!-- Layout Content -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+<!-- Main Search Results -->
+<section class="md:col-span-8 space-y-md">
+<div class="flex items-center justify-between px-2">
+<span class="text-body-sm text-on-surface-variant">找到约 1,240 条结果</span>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary">filter_list</span>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary">sort</span>
+</div>
+</div>
+<!-- Result Card 1 -->
+<article class="bg-white dark:bg-slate-800 p-md rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-h3 text-h3 text-primary dark:text-blue-300">多级孔分子筛的合成及其在石油化工中的应用</h3>
+<div class="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px] text-blue-700" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-[10px] font-bold text-blue-700 uppercase">98% 相关度</span>
+</div>
+</div>
+<p class="text-body-md text-on-surface-variant line-clamp-2 mb-4">
+                            本文系统阐述了多级孔分子筛（Hierarchical Zeolites）的合成策略，包括软模板法、硬模板法以及脱铝脱硅等后处理方法。通过孔径分布测试证实了其显著的扩散性能优势...
+                        </p>
+<div class="flex items-center justify-between pt-md border-t border-slate-50 dark:border-slate-700">
+<div class="flex gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[11px] font-medium">分子筛</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[11px] font-medium">催化剂</span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-1 text-primary dark:text-blue-300 font-label-caps text-label-caps hover:underline">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+                                    查看原文
+                                </button>
+<button class="flex items-center gap-1 bg-tertiary-container text-tertiary-fixed px-3 py-1.5 rounded-lg font-label-caps text-label-caps hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+                                    深度提问
+                                </button>
+</div>
+</div>
+</article>
+<!-- Result Card 2 -->
+<article class="bg-white dark:bg-slate-800 p-md rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-h3 text-h3 text-primary dark:text-blue-300">2023年度新型半导体材料量子效应研究报告</h3>
+<div class="flex items-center gap-1 bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px] text-orange-600" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-[10px] font-bold text-orange-600 uppercase">92% 相关度</span>
+</div>
+</div>
+<p class="text-body-md text-on-surface-variant line-clamp-2 mb-4">
+                            针对宽禁带半导体材料在超低温环境下的量子隧穿效应进行了详尽的数学建模与实验观测。结果表明，掺杂浓度的微小波动对电荷迁移率具有非线性的显著影响...
+                        </p>
+<div class="flex items-center justify-between pt-md border-t border-slate-50 dark:border-slate-700">
+<div class="flex gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[11px] font-medium">量子材料</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[11px] font-medium">半导体</span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-1 text-primary dark:text-blue-300 font-label-caps text-label-caps hover:underline">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+                                    查看原文
+                                </button>
+<button class="flex items-center gap-1 bg-tertiary-container text-tertiary-fixed px-3 py-1.5 rounded-lg font-label-caps text-label-caps hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+                                    深度提问
+                                </button>
+</div>
+</div>
+</article>
+<!-- Result Card 3 -->
+<article class="bg-white dark:bg-slate-800 p-md rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-h3 text-h3 text-primary dark:text-blue-300">有机合成中的绿色溶剂替代方案评述</h3>
+<div class="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px] text-blue-700" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-[10px] font-bold text-blue-700 uppercase">85% 相关度</span>
+</div>
+</div>
+<p class="text-body-md text-on-surface-variant line-clamp-2 mb-4">
+                            本研究对比了水相合成、超临界流体以及离子液体在复杂有机分子全合成中的效能。重点分析了溶剂回收率与原子经济性之间的平衡关系...
+                        </p>
+<div class="flex items-center justify-between pt-md border-t border-slate-50 dark:border-slate-700">
+<div class="flex gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[11px] font-medium">绿色化学</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[11px] font-medium">溶剂</span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-1 text-primary dark:text-blue-300 font-label-caps text-label-caps hover:underline">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+                                    查看原文
+                                </button>
+<button class="flex items-center gap-1 bg-tertiary-container text-tertiary-fixed px-3 py-1.5 rounded-lg font-label-caps text-label-caps hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+                                    深度提问
+                                </button>
+</div>
+</div>
+</article>
+</section>
+<!-- Aside Content (Tag Cloud & More) -->
+<section class="md:col-span-4 space-y-lg">
+<!-- Tag Cloud Card -->
+<div class="bg-white dark:bg-slate-800 p-md rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-2 mb-4 text-primary dark:text-blue-300">
+<span class="material-symbols-outlined text-xl">sell</span>
+<h2 class="font-h2 text-h2">热门标签云</h2>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-900 text-body-sm font-medium hover:bg-primary hover:text-white cursor-pointer transition-colors border border-blue-100">人工智能</span>
+<span class="px-3 py-1.5 rounded-full bg-orange-50 text-orange-900 text-body-sm font-medium hover:bg-tertiary-container hover:text-white cursor-pointer transition-colors border border-orange-100">材料力学</span>
+<span class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-body-sm font-medium hover:bg-secondary cursor-pointer transition-colors">生物医药</span>
+<span class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-900 text-body-sm font-medium hover:bg-primary hover:text-white cursor-pointer transition-colors border border-blue-100">量子物理</span>
+<span class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-body-sm font-medium hover:bg-secondary cursor-pointer transition-colors">可持续能源</span>
+<span class="px-3 py-1.5 rounded-full bg-orange-50 text-orange-900 text-body-sm font-medium hover:bg-tertiary-container hover:text-white cursor-pointer transition-colors border border-orange-100">有机化学</span>
+<span class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-body-sm font-medium hover:bg-secondary cursor-pointer transition-colors">纳米技术</span>
+<span class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-900 text-body-sm font-medium hover:bg-primary hover:text-white cursor-pointer transition-colors border border-blue-100">航空航天</span>
+</div>
+</div>
+<!-- Toxicity/Caution Alert -->
+<div class="bg-[#FFFAF0] p-md rounded-xl border-l-4 border-[#F6AD55] shadow-sm">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-[#DD6B20]">warning</span>
+<div class="space-y-1">
+<h4 class="text-sm font-bold text-[#DD6B20]">实验室安全提示</h4>
+<p class="text-[12px] text-slate-600 leading-tight">在进行上述分子筛合成实验时，请务必在通风橱内操作，并佩戴防酸碱手套，防止氢氟酸腐蚀。</p>
+</div>
+</div>
+</div>
+<!-- Quick Stats Chart Placeholder -->
+<div class="bg-white dark:bg-slate-800 p-md rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
+<h4 class="text-body-sm font-bold mb-4 text-on-surface">学科活跃度趋势</h4>
+<div class="h-32 w-full flex items-end gap-1.5">
+<div class="flex-1 bg-primary/20 rounded-t-sm h-[40%]"></div>
+<div class="flex-1 bg-primary/40 rounded-t-sm h-[60%]"></div>
+<div class="flex-1 bg-primary/20 rounded-t-sm h-[30%]"></div>
+<div class="flex-1 bg-primary/60 rounded-t-sm h-[80%]"></div>
+<div class="flex-1 bg-primary/40 rounded-t-sm h-[50%]"></div>
+<div class="flex-1 bg-tertiary-container/80 rounded-t-sm h-[95%]"></div>
+<div class="flex-1 bg-primary/30 rounded-t-sm h-[45%]"></div>
+</div>
+<div class="flex justify-between mt-2 text-[10px] text-slate-400">
+<span>Mon</span>
+<span>Tue</span>
+<span>Wed</span>
+<span>Thu</span>
+<span>Fri</span>
+<span>Sat</span>
+<span>Sun</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-20 bg-white dark:bg-slate-950 flex justify-around items-center pb-safe px-2 z-50 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_rgba(26,54,93,0.05)]">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:scale-95 duration-200 transition-all hover:text-blue-700 dark:hover:text-blue-300" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[11px] font-medium tracking-wide">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-900 dark:text-blue-300 font-bold scale-105 transition-transform active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">library_books</span>
+<span class="text-[11px] font-medium tracking-wide">知识库</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:scale-95 duration-200 transition-all hover:text-blue-700 dark:hover:text-blue-300" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-[11px] font-medium tracking-wide">知识图谱</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 active:scale-95 duration-200 transition-all hover:text-blue-700 dark:hover:text-blue-300" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[11px] font-medium tracking-wide">个人中心</span>
+</a>
+</nav>
+<!-- Floating Action Button (Contextual for Researching) -->
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</body></html>

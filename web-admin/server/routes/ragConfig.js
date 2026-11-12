@@ -33,11 +33,21 @@ const DEFAULT_RAG_CONFIG = {
     rerankStatus: 0        // 智谱重排开关：0 关闭 | 1 开启
   },
   context: {
-    maxChunks: 4,          // 送入 LLM 的最大分块数
+    maxChunks: 10,          // 送入 LLM 的最大分块数
     maxTokens: 2000,       // 上下文 token 预算
     minScore: 40,          // 最低相关度分（0-100）
     overlap: 200,          // 分块重叠字符数
     includeMetadata: true  // 是否在上下文中携带来源元数据
+  },
+  graph: {
+    enabled: true,
+    hybridTimeout: 85000,
+    plannerTimeout: 12000,
+    queryTimeout: 15000,
+    maxHops: 2,
+    maxFacts: 20,
+    contextMaxTokens: 800,
+    schemaCacheTTL: 600000
   }
 }
 
@@ -46,13 +56,15 @@ const PRESETS = {
   precise: {
     zhipu: { useZhipuKb: true, topN: 10, cloudTimeout: 12000 },
     retrieval: { recallMethod: 'mixed', recallRatio: 70, rerankStatus: 1 },
-    context: { maxChunks: 3, maxTokens: 1500, minScore: 50, overlap: 150, includeMetadata: true }
+    context: { maxChunks: 3, maxTokens: 1500, minScore: 50, overlap: 150, includeMetadata: true },
+    graph: { ...DEFAULT_RAG_CONFIG.graph, maxFacts: 8, contextMaxTokens: 600 }
   },
   balanced: null, // 等价于 DEFAULT_RAG_CONFIG
   recall: {
     zhipu: { useZhipuKb: true, topN: 25, cloudTimeout: 20000 },
     retrieval: { recallMethod: 'mixed', recallRatio: 90, rerankStatus: 0 },
-    context: { maxChunks: 8, maxTokens: 3000, minScore: 20, overlap: 250, includeMetadata: true }
+    context: { maxChunks: 8, maxTokens: 3000, minScore: 20, overlap: 250, includeMetadata: true },
+    graph: { ...DEFAULT_RAG_CONFIG.graph, maxFacts: 20, contextMaxTokens: 1200 }
   }
 }
 
@@ -92,6 +104,15 @@ function validateConfig(cfg) {
   if (c.maxChunks !== undefined && (c.maxChunks < 1 || c.maxChunks > 20)) return 'maxChunks 范围 1-20'
   if (c.maxTokens !== undefined && (c.maxTokens < 500 || c.maxTokens > 8000)) return 'maxTokens 范围 500-8000'
   if (c.minScore !== undefined && (c.minScore < 0 || c.minScore > 100)) return 'minScore 范围 0-100'
+  const g = cfg.graph || {}
+  if (g.enabled !== undefined && typeof g.enabled !== 'boolean') return 'graph.enabled 必须为布尔值'
+  if (g.hybridTimeout !== undefined && (g.hybridTimeout < 10000 || g.hybridTimeout > 120000)) return 'hybridTimeout 范围 10000-120000'
+  if (g.plannerTimeout !== undefined && (g.plannerTimeout < 3000 || g.plannerTimeout > 30000)) return 'plannerTimeout 范围 3000-30000'
+  if (g.queryTimeout !== undefined && (g.queryTimeout < 1000 || g.queryTimeout > 30000)) return 'queryTimeout 范围 1000-30000'
+  if (g.maxHops !== undefined && (g.maxHops < 1 || g.maxHops > 4)) return 'maxHops 范围 1-4'
+  if (g.maxFacts !== undefined && (g.maxFacts < 1 || g.maxFacts > 20)) return 'maxFacts 范围 1-20'
+  if (g.contextMaxTokens !== undefined && (g.contextMaxTokens < 100 || g.contextMaxTokens > 4000)) return 'contextMaxTokens 范围 100-4000'
+  if (g.schemaCacheTTL !== undefined && (g.schemaCacheTTL < 60000 || g.schemaCacheTTL > 3600000)) return 'schemaCacheTTL 范围 60000-3600000'
   return null
 }
 

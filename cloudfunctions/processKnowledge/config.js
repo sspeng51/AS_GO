@@ -19,17 +19,15 @@ let config = {
     // ============================================================
     // 【云函数模型配置源】修改模型只需改这一行！
     // 可选值：
-    //   - glm-4.5-flash（推荐,5-10s,质量中等）
-    //   - glm-5.2（旗舰混合思考,需配合下方 thinking 配置）
+    //   - glm-5.3（当前主回答模型）
     // ============================================================
     // 保持与小程序配置及流式服务白名单一致。
-    model: 'glm-5.2',
+    model: 'glm-5.3',
     temperature: 0.7,
     maxTokens: 2048,
     // GLM-5.x 混合思考模型专用配置（其他模型自动忽略）
-    // 思考强度档位：low（最快）< medium < high < max（默认最慢）
-    // glm-5.2 默认 max 会超时，必须设置为 medium 或 low
-    thinking: { reasoning_effort: 'medium' },
+    // GLM-5.3 支持 low / high / max；low 用于控制响应时间。
+    thinking: { reasoning_effort: 'low' },
     // 智谱托管知识库 ID（公共知识库），从环境变量注入
     knowledgeId: process.env.ZHIPU_KNOWLEDGE_ID || '',
     // 视觉模型（图片 OCR 用）

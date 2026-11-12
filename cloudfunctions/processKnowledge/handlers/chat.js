@@ -15,6 +15,7 @@ const { extractText, getExt } = require('../lib/fileParser')
 const { isOwnedByAny } = require('../lib/attachmentOwnership')
 const { getChatUsageLimits, evaluateUsage } = require('../lib/usagePolicy')
 const { createStreamToken } = require('../lib/streamToken')
+const { applyExpertPolicy } = require('../lib/expertPolicy')
 
 function getTrustedOpenId(context) {
   try {
@@ -125,6 +126,7 @@ async function handleChatComplete(data, context) {
   if (promptChars > 50000) {
     return { success: false, error: '对话上下文过长' }
   }
+  const expertRequest = applyExpertPolicy(messages, { enabled: process.env.EXPERT_POLICY_ENABLED !== 'false' })
 
   try {
     await enforceChatUsageLimit(context)
@@ -143,7 +145,7 @@ async function handleChatComplete(data, context) {
 
   // 模型从统一配置读取（config/config.js 的 zhipu.model）
   // 修改模型只需改 config/config.js 一处，无需改本文件
-  const configuredModel = config.zhipu.model || 'glm-5.2'
+  const configuredModel = config.zhipu.model || 'glm-5.3'
   const allowedModels = new Set(
     String(process.env.ALLOWED_CHAT_MODELS || `${configuredModel},glm-4.5-flash`)
       .split(',')
@@ -175,7 +177,7 @@ async function handleChatComplete(data, context) {
       const t1 = Date.now()
       const result = await callZhipuChatAPI({
         model: useModel,
-        messages,
+        messages: expertRequest.messages,
         temperature: useTemp,
         maxTokens: useMaxTokens,
         apiKey,
@@ -216,6 +218,7 @@ async function handleChatComplete(data, context) {
           reasoning,  // 透传思考过程（可选用于调试）
           usage: parsed.usage || {},
           model: parsed.model || useModel,
+          expertPolicy: expertRequest.metadata,
           webSearch: useWebSearch,
           webSearchInfo,
           // 透传 finish_reason：'length' 表示因 max_tokens 截断，前端据此提示用户

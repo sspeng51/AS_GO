@@ -17,6 +17,15 @@ const { isAuthorizedInvocation } = require('../cloudfunctions/userConsistencyChe
 const clientConfig = require('../config/config')
 const cloudConfig = require('../cloudfunctions/processKnowledge/config')
 const { appendWithoutOverlap, continuationMessages } = require('../utils/continuation')
+const { parsePlannerJson, validateReadOnlyCypher, validateCypherAgainstSchema, buildConstrainedCypher } = require('../cloudfunctions/processKnowledge/lib/cypherSafety')
+const { normalizeGraphRecords, documentEvidences, buildContext } = require('../cloudfunctions/processKnowledge/lib/hybridEvidence')
+const { normalizeNeo4jParams } = require('../cloudfunctions/processKnowledge/lib/neo4jParams')
+const { buildEvidenceGraph } = require('../utils/evidenceGraph')
+const { isRetryablePlannerRequestError, plannerThinkingConfig } = require('../cloudfunctions/processKnowledge/lib/plannerFallback')
+const { transactionTimeouts, isNeo4jTimeout } = require('../cloudfunctions/processKnowledge/lib/neo4jTimeout')
+const { ENTITY_TYPE_NAMES, RELATION_TYPE_NAMES, validateDomainPlan } = require('../cloudfunctions/processKnowledge/lib/domainGraphSchema')
+const { calculateHybridTimeout } = require('../utils/hybridTimeout')
+const { expandBilingualQuery } = require('../cloudfunctions/processKnowledge/lib/bilingualQuery')
 
 function test(name, fn) {
   try {
@@ -33,6 +42,19 @@ test('长文本按限制切分并保留重叠上下文', () => {
   assert.strictEqual(chunks.length, 3)
   assert.ok(chunks.every(chunk => chunk.length <= 500))
   assert.strictEqual(chunks[0].slice(-100), chunks[1].slice(0, 100))
+})
+
+test('中英混合查询会展开双语领域术语且保持原问题', () => {
+  const zh = expandBilingualQuery('含砷废水如何去除？')
+  assert.strictEqual(zh.queries[0], '含砷废水如何去除？')
+  assert.ok(zh.expanded.includes('arsenic'))
+  assert.ok(zh.expanded.includes('wastewater'))
+  assert.ok(zh.expanded.includes('removal'))
+  const en = expandBilingualQuery('arsenic recovery from flue dust')
+  assert.ok(en.expanded.includes('砷'))
+  assert.ok(en.expanded.includes('烟尘'))
+  assert.deepStrictEqual(en.detectedLanguages, ['en'])
+  assert.ok(!expandBilingualQuery('wastewater treatment').terms.includes('砷'))
 })
 
 test('Markdown 代码块整体保留', () => {
@@ -126,6 +148,162 @@ test('智谱重排服务异常时允许关闭重排自动降级', () => {
   assert.strictEqual(isRetryableRerankFailure(500, '鉴权失败'), false)
 })
 
+test('Cypher 规划 JSON 支持代码围栏并限制实体数量', () => {
+  const plan = parsePlannerJson('```json\n{"entities":["砷","铜"],"entityTypes":[{"name":"砷","type":"化学元素/化合物"},{"name":"铜","type":"化学元素/化合物"}],"relations":["产生"],"intent":"查询关系","cypher":"MATCH p=(a)-[r]->(b) WHERE a.name = $entity RETURN nodes(p) AS nodes, relationships(p) AS relationships LIMIT $limit","params":{"entity":"砷","limit":12}}\n```')
+  assert.deepStrictEqual(plan.entities, ['砷', '铜'])
+  assert.strictEqual(plan.entityTypes[0].type, '化学元素/化合物')
+  assert.strictEqual(plan.params.entity, '砷')
+})
+
+test('领域实体关系严格使用 schema.py 的 12 类实体和 24 类关系', () => {
+  assert.deepStrictEqual(ENTITY_TYPE_NAMES, [
+    '物料物质', '工艺过程', '设备设施', '参数指标', '产物废料', '组织机构',
+    '环境要素', '化学元素/化合物', '添加剂', '检测方法', '工艺阶段', '标准规范'
+  ])
+  assert.deepStrictEqual(RELATION_TYPE_NAMES, [
+    '含有', '产生', '消耗', '采用工艺', '发生于', '参数为', '转化为', '脱除/去除',
+    '回收', '富集于', '挥发进入', '共沉淀', '污染/危害', '属于/是一种', '处理/治理',
+    '制造/实施方', '分解', '吸附', '检测', '达到', '排放', '溶解', '沉淀', '氧化/还原'
+  ])
+  const plan = {
+    entities: ['砷', '含砷废水'],
+    entityTypes: [
+      { name: '砷', type: '化学元素/化合物' },
+      { name: '含砷废水', type: '环境要素' }
+    ],
+    relations: ['处理/治理'],
+    params: { types: ['化学元素/化合物', '环境要素'], rel_types: ['处理/治理'] }
+  }
+  assert.strictEqual(validateDomainPlan(plan), true)
+  assert.throws(() => validateDomainPlan({ ...plan, relations: ['治理'] }), /Schema 外/)
+  assert.throws(() => validateDomainPlan({ ...plan, entityTypes: [{ name: '砷', type: '污染物' }] }), /Schema 外/)
+})
+
+test('只读 Cypher 校验接受参数化路径并收紧 LIMIT', () => {
+  const result = validateReadOnlyCypher(
+    'MATCH p=(a)-[r]->(b) WHERE a.name = $entity RETURN nodes(p) AS nodes, relationships(p) AS relationships LIMIT $limit',
+    { entity: '砷', limit: 99 },
+    { maxHops: 2, maxFacts: 12 }
+  )
+  assert.strictEqual(result.params.limit, 12)
+})
+
+test('只读 Cypher 校验拒绝写入、过程、多语句、字面量和无界路径', () => {
+  const suffix = 'RETURN nodes(p) AS nodes, relationships(p) AS relationships LIMIT $limit'
+  const params = { entity: '砷', limit: 10 }
+  assert.throws(() => validateReadOnlyCypher(`MATCH p=(a)-[r]->(b) SET a.name = $entity ${suffix}`, params), /SET/)
+  assert.throws(() => validateReadOnlyCypher(`MATCH p=(a)-[r]->(b) CALL db.labels() ${suffix}`, params), /CALL/)
+  assert.throws(() => validateReadOnlyCypher(`MATCH p=(a)-[r]->(b); ${suffix}`, params), /单条/)
+  assert.throws(() => validateReadOnlyCypher(`MATCH p=(a)-[r]->(b) WHERE a.name = '砷' ${suffix}`, { limit: 10 }), /字符串字面量/)
+  assert.throws(() => validateReadOnlyCypher(`MATCH p=(a)-[r*]-(b) WHERE a.name = $entity ${suffix}`, params), /最小和最大/)
+  assert.throws(() => validateReadOnlyCypher('MATCH p=(a)-[r]->(b) RETURN p LIMIT $limit', { limit: 10 }), /约定返回/)
+  assert.throws(() => validateReadOnlyCypher(`MATCH p=(a)-[r]->(b) WHERE a.name = $entity ${suffix.replace('RETURN', 'ORDER BY a.name RETURN')}`, params), /ORDER/)
+  assert.throws(() => validateReadOnlyCypher(`MATCH p=(a)-[r]->(b) ${suffix}`, { limit: 10 }), /WHERE/)
+})
+
+test('模型 Cypher 含字面量时可从实体关系生成参数化模板', () => {
+  const plan = {
+    entities: ['砷'],
+    entityTypes: [{ name: '砷', type: '化学元素/化合物' }],
+    relations: ['富集于'],
+    entityAliases: { '砷': ['arsenic', 'As'] }
+  }
+  const schema = {
+    nodes: [{ label: 'Entity', properties: ['name', 'type'] }],
+    relationships: [{ type: 'RELATED_TO', properties: ['type'] }]
+  }
+  const fallback = buildConstrainedCypher(plan, schema, { maxFacts: 20 })
+  assert.ok(!/['"]/.test(fallback.cypher))
+  assert.ok(fallback.cypher.includes('ANY(term IN $entity_terms0'))
+  assert.ok(fallback.cypher.includes('toLower(toString(a.name)) CONTAINS toLower(term)'))
+  assert.deepStrictEqual(fallback.params.entity_terms0, ['砷', 'arsenic', 'As'])
+  assert.ok(fallback.params.rel_types.includes('富集于'))
+  assert.ok(fallback.params.rel_types.includes('enriched in'))
+  assert.ok(fallback.params.entity_types.includes('化学元素/化合物'))
+  assert.ok(fallback.params.entity_types.includes('chemical element/compound'))
+  assert.strictEqual(validateReadOnlyCypher(fallback.cypher, fallback.params, { maxFacts: 20 }).params.limit, 20)
+  assert.strictEqual(validateCypherAgainstSchema(fallback.cypher, schema), true)
+})
+
+test('Cypher 只能使用实时 schema 中存在的标签、关系和属性', () => {
+  const schema = {
+    nodes: [{ label: '工艺', properties: ['name', 'description'] }, { label: '污染物', properties: ['name'] }],
+    relationships: [{ type: '产生', properties: ['source'] }]
+  }
+  assert.strictEqual(validateCypherAgainstSchema(
+    'MATCH p=(a:工艺)-[:产生]->(b:污染物) WHERE a.name = $entity RETURN nodes(p) AS nodes, relationships(p) AS relationships LIMIT $limit',
+    schema
+  ), true)
+  assert.throws(() => validateCypherAgainstSchema(
+    'MATCH p=(a:不存在)-[:产生]->(b:污染物) RETURN nodes(p) AS nodes, relationships(p) AS relationships LIMIT $limit',
+    schema
+  ), /schema 外的节点标签/)
+  assert.throws(() => validateCypherAgainstSchema(
+    'MATCH p=(a:工艺)-[:未知关系]->(b:污染物) RETURN nodes(p) AS nodes, relationships(p) AS relationships LIMIT $limit',
+    schema
+  ), /schema 外的关系类型/)
+})
+
+test('混合证据过滤文档、去重图谱关系并使用独立引用编号', () => {
+  const cfg = {
+    context: { minScore: 40, maxChunks: 2, maxTokens: 100 },
+    graph: { contextMaxTokens: 100 }
+  }
+  const documents = documentEvidences({ results: [
+    { id: 'd1', title: '文档甲', content: '砷处理说明', score: 90, documentId: 'doc1' },
+    { id: 'd2', title: '文档乙', content: '低相关内容', score: 20, documentId: 'doc2' }
+  ] }, cfg)
+  assert.strictEqual(documents.length, 1)
+  assert.strictEqual(documents[0].score, 0.9)
+
+  const record = {
+    get(key) {
+      if (key === 'nodes') return [
+        { elementId: '1', properties: { name: '铜冶炼', description: '生产过程' } },
+        { elementId: '2', properties: { name: '砷烟尘' } }
+      ]
+      if (key === 'relationships') return [{ type: '产生', startNodeElementId: '1' }]
+      return null
+    }
+  }
+  const graph = normalizeGraphRecords([record, record], 10)
+  assert.strictEqual(graph.length, 1)
+  assert.strictEqual(graph[0].title, '铜冶炼 —产生→ 砷烟尘')
+  const context = buildContext(documents, graph, cfg)
+  assert.ok(context.includes('[文档1]'))
+  assert.ok(context.includes('[图谱1]'))
+  assert.ok(!context.includes('[来源1]'))
+})
+
+test('图谱实体关系最多展示前 20 条', () => {
+  const records = Array.from({ length: 25 }, (_, index) => ({
+    get(key) {
+      if (key === 'nodes') return [
+        { elementId: `s${index}`, properties: { name: `实体${index}` } },
+        { elementId: `t${index}`, properties: { name: `目标${index}` } }
+      ]
+      if (key === 'relationships') return [{ type: '含有', startNodeElementId: `s${index}` }]
+      return null
+    }
+  }))
+  const graph = normalizeGraphRecords(records, 20)
+  assert.strictEqual(graph.length, 20)
+  assert.strictEqual(graph[0].nodes[0], '实体0')
+  assert.strictEqual(graph[19].nodes[1], '目标19')
+})
+
+test('图谱检索证据会聚合为节点—关系可视化数据', () => {
+  const graph = buildEvidenceGraph([
+    { id: 'g1', sourceType: 'neo4j', nodes: ['铜精矿', '砷'], relation: '含有' },
+    { id: 'g2', sourceType: 'neo4j', nodes: ['砷', '烟尘'], relation: '富集于' },
+    { id: 'd1', sourceType: 'zhipu', nodes: ['忽略', '忽略'], relation: '相关' }
+  ])
+  assert.strictEqual(graph.nodeCount, 3)
+  assert.strictEqual(graph.edgeCount, 2)
+  assert.strictEqual(graph.nodes.find(node => node.label === '砷').isCore, true)
+  assert.ok(graph.edges.every(edge => edge.width > 0 && Number.isFinite(edge.angle)))
+})
+
 test('流式令牌具备签名、短有效期和防篡改能力', () => {
   const secret = 's'.repeat(48)
   const token = createStreamToken(secret, 'user-123', 120)
@@ -194,6 +372,7 @@ test('关键安全修复已接入路由', () => {
   assert.ok(auth.includes("router.post('/register', authMiddleware, requireAdmin"))
   assert.ok(processIndex.includes("'chat.attachment.extract'"))
   assert.ok(processIndex.includes("'chat.streamToken'"))
+  assert.ok(processIndex.includes("'kb.hybrid.search'"))
   assert.ok(fs.readFileSync(path.join(root, 'cloudfunctions/processKnowledge/handlers/chat.js'), 'utf8').includes('isOwnedByAny'))
   assert.ok(conversation.includes('CHAT_CONVERSATION_ADMIN_SECRET'))
   assert.ok(authMiddleware.includes('function requireStaff'))
@@ -205,6 +384,90 @@ test('关键安全修复已接入路由', () => {
   assert.ok(streamRoute.includes("res.on('close'"))
   assert.ok(!streamRoute.includes("req.on('close'"))
   assert.ok(streamRoute.includes('上游流式响应未正常完成'))
+})
+
+test('混合检索严格先执行智谱检索再进入 Neo4j 规划', () => {
+  const handler = fs.readFileSync(path.join(root, 'cloudfunctions/processKnowledge/handlers/hybridRag.js'), 'utf8')
+  const zhipuPosition = handler.indexOf('zhipuKb.handleZhipuKBSearch')
+  const graphPosition = handler.indexOf('loadNeo4jSchema(graphOptions')
+  assert.ok(zhipuPosition > 0)
+  assert.ok(graphPosition > zhipuPosition)
+  assert.ok(handler.includes("['glm-5.3-flash', 'glm-4.7-flashx', 'glm-4.7-flash', 'glm-5.3']"))
+  assert.strictEqual(clientConfig.zhipu.model, 'glm-5.3')
+  assert.ok(handler.includes('[400, 429].includes(result.statusCode)'))
+  assert.ok(handler.includes("{ role: 'user', content: String(query) }"))
+  assert.ok(handler.includes('thinkingConfig: plannerThinkingConfig(model)'))
+})
+
+test('Cypher 规划模型请求超时会回退，鉴权错误不会回退', () => {
+  assert.strictEqual(isRetryablePlannerRequestError(new Error('请求超时')), true)
+  assert.strictEqual(isRetryablePlannerRequestError({ code: 'ECONNRESET', message: 'socket hang up' }), true)
+  assert.strictEqual(isRetryablePlannerRequestError({ statusCode: 401, message: 'unauthorized' }), false)
+})
+
+test('GLM-5.3 规划使用 low 思考，其他 Flash 规划关闭思考', () => {
+  assert.deepStrictEqual(plannerThinkingConfig('glm-5.3-flash'), { reasoning_effort: 'low' })
+  assert.deepStrictEqual(plannerThinkingConfig('glm-5.3'), { reasoning_effort: 'low' })
+  assert.deepStrictEqual(plannerThinkingConfig('glm-4.7-flash'), { type: 'disabled' })
+  assert.deepStrictEqual(cloudConfig.zhipu.thinking, { reasoning_effort: 'low' })
+})
+
+test('智谱客户端使用标准 thinking.type 并兼容旧关闭参数', () => {
+  const client = fs.readFileSync(path.join(root, 'cloudfunctions/processKnowledge/lib/zhipuClient.js'), 'utf8')
+  assert.ok(client.includes("requestBody.thinking = { type: thinkingConfig.type }"))
+  assert.ok(client.includes("requestBody.thinking = { type: 'disabled' }"))
+  assert.ok(!client.includes('requestBody.enable_' + 'thinking = false'))
+})
+
+test('流式服务和客户端透传模型思考内容', () => {
+  const client = fs.readFileSync(path.join(root, 'api/zhipu.js'), 'utf8')
+  const streamRoute = fs.readFileSync(path.join(root, 'web-admin/server/routes/chatStream.js'), 'utf8')
+  const indexPage = fs.readFileSync(path.join(root, 'pages/index/index.js'), 'utf8')
+  assert.ok(client.includes('onReasoning'))
+  assert.ok(client.includes('fullReasoning'))
+  assert.ok(streamRoute.includes('delta.reasoning_content'))
+  assert.ok(streamRoute.includes("JSON.stringify({ reasoning })"))
+  assert.ok(indexPage.includes('toggleReasoningExpand'))
+  assert.ok(indexPage.includes('reasoningExpanded`] = false'))
+  assert.ok(indexPage.includes('const SHOW_REASONING = false'))
+})
+
+test('Neo4j 查询参数将 JSON 安全整数转换为驱动 Integer', () => {
+  const converted = normalizeNeo4jParams({
+    limit: 20,
+    score: 0.75,
+    values: [1, 2.5, { hops: 2 }],
+    keyword: '含砷废液'
+  }, value => ({ neo4jInteger: value }))
+
+  assert.deepStrictEqual(converted.limit, { neo4jInteger: 20 })
+  assert.strictEqual(converted.score, 0.75)
+  assert.deepStrictEqual(converted.values, [
+    { neo4jInteger: 1 },
+    2.5,
+    { hops: { neo4jInteger: 2 } }
+  ])
+  assert.strictEqual(converted.keyword, '含砷废液')
+})
+
+test('混合检索客户端超时覆盖完整顺序链路预算', () => {
+  const config = {
+    zhipu: { cloudTimeout: 15000 },
+    retrieval: { rerankStatus: 0 },
+    graph: { hybridTimeout: 35000, plannerTimeout: 12000, queryTimeout: 5000 }
+  }
+  assert.strictEqual(calculateHybridTimeout(config), 70000)
+  config.retrieval.rerankStatus = 1
+  assert.strictEqual(calculateHybridTimeout(config), 70000)
+  config.graph.hybridTimeout = 110000
+  assert.strictEqual(calculateHybridTimeout(config), 70000)
+})
+
+test('Neo4j 短事务超时会使用新事务按 15 秒重试', () => {
+  assert.deepStrictEqual(transactionTimeouts(5000), [5000, 15000])
+  assert.deepStrictEqual(transactionTimeouts(15000), [15000])
+  assert.strictEqual(isNeo4jTimeout(new Error('The transaction has not completed within the timeout specified by the client.')), true)
+  assert.strictEqual(isNeo4jTimeout(new Error('Neo4j authentication failed')), false)
 })
 
 console.log('\n全部核心测试通过。')

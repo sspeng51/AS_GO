@@ -33,7 +33,7 @@ const ZHIPU_KB_API_BASE = 'https://open.bigmodel.cn/api/llm-application/open'
  * 调用智谱 GLM 对话 API（非流式）
  * @returns {Promise<{statusCode, data, raw}>}
  */
-function callZhipuChatAPI({ model, messages, temperature, maxTokens, apiKey, webSearch = false, thinkingConfig = null }) {
+function callZhipuChatAPI({ model, messages, temperature, maxTokens, apiKey, webSearch = false, thinkingConfig = null, timeout = null }) {
   return new Promise((resolve, reject) => {
     // P0-1: 关闭 stream，避免响应为 SSE 多片段导致 JSON.parse 失败
     // 真流式由独立的 chatStream 云函数（HTTP 触发）实现，这里保持非流式
@@ -45,13 +45,16 @@ function callZhipuChatAPI({ model, messages, temperature, maxTokens, apiKey, web
       stream: false
     }
 
-    // GLM-5.x 混合思考模型参数：
-    // - reasoning_effort: low/medium/high/max（默认 max 最慢）
-    // - enable_thinking: false 完全关闭思考
+    // GLM-4.5+ 混合思考模型参数：
+    // - thinking.type: enabled/disabled（官方标准格式）
+    // - reasoning_effort: low/medium/high/max（GLM-5.2）
+    // 兼容旧调用方的 enable_thinking:false，并转换为标准 thinking 格式。
     // 仅当 thinkingConfig 显式传入时生效，避免影响非思考模型
     if (thinkingConfig) {
-      if (thinkingConfig.enable_thinking === false) {
-        requestBody.enable_thinking = false
+      if (['enabled', 'disabled'].includes(thinkingConfig.type)) {
+        requestBody.thinking = { type: thinkingConfig.type }
+      } else if (thinkingConfig.enable_thinking === false) {
+        requestBody.thinking = { type: 'disabled' }
       } else if (thinkingConfig.reasoning_effort) {
         requestBody.thinking = { type: 'enabled' }
         requestBody.reasoning_effort = thinkingConfig.reasoning_effort
@@ -70,6 +73,7 @@ function callZhipuChatAPI({ model, messages, temperature, maxTokens, apiKey, web
     const postData = JSON.stringify(requestBody)
 
     const url = new URL(config.zhipu.baseUrl + '/chat/completions')
+    const requestTimeout = Math.min(Math.max(Number(timeout) || config.timeouts.chatUpstream, 1000), config.timeouts.chatUpstream)
     const options = {
       hostname: url.hostname,
       port: url.port || 443,
@@ -81,7 +85,7 @@ function callZhipuChatAPI({ model, messages, temperature, maxTokens, apiKey, web
         'Content-Length': Buffer.byteLength(postData)
       },
       // 云函数总预算 120s，给结果处理和网络收尾预留约 20s。
-      timeout: config.timeouts.chatUpstream
+      timeout: requestTimeout
     }
 
     const req = https.request(options, (res) => {
@@ -101,7 +105,7 @@ function callZhipuChatAPI({ model, messages, temperature, maxTokens, apiKey, web
       reject(err)
     })
     req.on('timeout', () => {
-      console.error(`[ZhipuClient] 请求超时（${config.timeouts.chatUpstream}ms无响应），destroy 连接`)
+      console.error(`[ZhipuClient] 请求超时（${requestTimeout}ms无响应），destroy 连接`)
       req.destroy()
       reject(new Error('请求超时'))
     })
@@ -167,8 +171,8 @@ function requestZhipuKBRetrieval({ apiKey, payload, timeout }) {
   })
 }
 
-async function callZhipuKBRetrieval({ knowledgeId, query, topK, apiKey }) {
-  const ragConfig = await getRagConfig()
+async function callZhipuKBRetrieval({ knowledgeId, query, topK, apiKey, ragConfig: configSnapshot }) {
+  const ragConfig = configSnapshot || await getRagConfig()
   const recallMethodMap = { vector: 'embedding', text: 'keyword' }
   const configuredRecallMethod = ragConfig.retrieval?.recallMethod
   const recallMethod = recallMethodMap[configuredRecallMethod] || configuredRecallMethod

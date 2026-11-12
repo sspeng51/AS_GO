@@ -25,6 +25,7 @@ const ragConfig = require('./handlers/ragConfig')
 const zhipuKb = require('./handlers/zhipuKb')
 const personalKb = require('./handlers/personalKb')
 const neo4jGraph = require('./handlers/neo4jGraph')
+const hybridRag = require('./handlers/hybridRag')
 const { maskId } = require('./lib/db')
 
 // action → handler 路由表（集中管理，新增 action 在此登记即可）
@@ -35,6 +36,9 @@ const ACTION_ROUTES = {
   'kb.zhipu.document.detail':  zhipuKb.handleZhipuKBDocumentDetail,
   'kb.zhipu.document.read':    zhipuKb.handleZhipuKBDocumentRead,
   'kb.zhipu.info':             zhipuKb.handleZhipuKBInfo,
+  'kb.hybrid.search':          hybridRag.handleHybridSearch,
+  'rag.tuning.search':         hybridRag.handleTuningSearch,
+  'rag.test.search':           hybridRag.handleTestSearch,
 
   // ===== RAG 配置下发 =====
   'rag.config.get':            ragConfig,

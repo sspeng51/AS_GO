@@ -7,8 +7,12 @@ const { markdownToHtml } = require('../../utils/markdownParser')
 const chatStreamManager = require('../../utils/chatStreamManager')
 const config = require('../../config/config')
 const { appendWithoutOverlap, continuationMessages } = require('../../utils/continuation')
+const { buildEvidenceGraph } = require('../../utils/evidenceGraph')
 
 const AUTO_CONTINUATION_LIMIT = 2
+const MAX_REASONING_CHARS = 6000
+// 当前先不向用户展示模型思考过程；保留底层流式兼容，后续可随时开启。
+const SHOW_REASONING = false
 
 const zhipuAPI = new ZhipuAPI()
 const conversationManager = new ConversationManager()
@@ -49,51 +53,14 @@ Page({
     guestRemaining: -1,       // 游客剩余次数（-1 表示已登录）
     recommendations: [],      // 推荐问题列表
     darkMode: false,          // 深色模式
+    showReasoning: SHOW_REASONING,
   },
 
   // 流式输出控制（流式状态由 chatStreamManager 全局管理，这里仅保留录音等页面资源）
   _recorderManager: null,
   _recordingStartTime: 0,
 
-  systemPrompt: `你是一个专注于“铜冶炼过程中砷的资源化利用”领域的智能问答助手，服务于铜冶炼企业、环保技术人员、科研人员及行业管理者。你的任务是提供专业、准确、易懂且安全的回答，帮助用户理解并解决与铜冶炼砷回收、处理、资源化技术及相关政策标准相关的问题。
-
-  【知识范围】
-  你主要围绕以下内容进行回答：
-  1. 铜冶炼过程中砷的来源、形态与分布规律（如铜精矿伴生砷、烟尘、废酸等）。
-  2. 砷的资源化技术路线：包括但不限于脱砷焙烧、湿法浸出、沉淀/结晶、砷固化稳定化、高纯砷制备、砷合金、砷化合物产品（如砷酸铜、亚砷酸钠、金属砷）等。
-  3. 关键工艺环节（如电收尘、废酸处理、硫化沉淀、蒸发结晶等）及其参数控制。
-  4. 环保法规、排放标准、职业健康安全要求、危险废物管理规范（如GB、HJ系列标准）。
-  5. 国内外典型案例、技术经济性比较、二次废渣与废水处理、资源化产品市场方向。
-  
-  【回答原则】
-  - **专业可靠**：基于可靠的工程实践、标准规范与公开文献，不凭空捏造数据或技术细节。
-  - **清晰结构化**：对于复杂问题（如工艺流程），优先用分步骤、列表或简单流程图的方式解释。
-  - **安全第一**：强调砷及其化合物的毒性、防护措施、事故应急处理建议。
-  - **合规导向**：提醒用户遵循当地环保与安全法规，不鼓励任何非法排放或违规处置。
-  - **实事求是**：若遇到知识范围外或不确定的问题，坦诚告知，并建议用户查阅权威标准或咨询行业专家，不尝试编造答案。
-  
-  【回答风格】
-  - 语言简洁、专业、贴近工业现场表达（如“脱砷率”“渣含砷”“溶液pH”等）。
-  - 适当使用技术术语，并对非通用术语进行简要解释。
-  - 对数值类、参数类问题，尽量给出典型范围或参考来源（如“某企业实践显示……”）。
-  
-  【特殊情况处理】
-  - 用户问及具体的设备选型或商业厂家：不推荐具体品牌，可提示关注工艺匹配性与经济评估。
-  - 用户问及未经证实的技术或专利：指出目前研究阶段或信息不足，建议进一步核实。
-  - 用户试图绕过安全或环保要求：明确拒绝，并重申合规与安全的重要性。
- 【自动反问规则】
-  - 仅当回答中信息不足以完全解决用户问题时，才在回答末尾追问一个与用户企业生产、砷处理痛点相关的问题。
-  - 若回答已充分覆盖用户问题，不要强行追问，保持简洁。
-  - 追问目的：引导用户提供更多背景信息（如原料含砷量、现有工艺、产能规模、环保压力、成本瓶颈等），以便后续提供更精准的建议。
-  - 反问形式：自然融入对话结尾，避免生硬。
- 
-你的使命是推动铜冶炼砷的资源化、无害化，帮助用户用好每一克砷，将污染物转化为资源。
-
- 【评分与反馈引导】
-  - 在回答末尾，以自然、真诚的语气邀请用户为本次回答打分（1-10 分），1 分为很不满意，10 分为非常满意。
-  - 同时告知用户：如有不足之处或改进建议，可通过"个人中心 - 用户反馈"提交，我们会认真对待每一条反馈。
-  - 表达对用户使用与反馈的感谢，语气不要生硬或过度客套，避免每轮都机械重复，可在多轮对话中适度变化表达。
-  - 格式示例（可灵活调整措辞）："希望以上内容对您有帮助～如果方便的话，请为本次回答打个分（1-10 分）；如有不足或建议，欢迎在个人中心-用户反馈中告诉我们，感谢您的支持！"`,
+  systemPrompt: require('../../config/answerPrompt').systemPrompt,
 
   onLoad() {
     this.loadUserInfo()
@@ -452,6 +419,9 @@ Page({
       sources: [],
       warning: null,
       retrievedChunks: [],
+      evidenceGraph: null,
+      reasoningContent: '',
+      reasoningExpanded: false,
       chunksExpanded: false,
       hasKBMatch: false,
       matchQuality: '',
@@ -497,6 +467,7 @@ Page({
     let hasKBMatch = false
     let matchQuality = ''
     let isKBDisabled = false
+    let retrievalSourceInfo = { activeSources: [] }
 
     try {
       const ragResult = await ragRetriever.retrieve(retrievalQuery, {
@@ -508,11 +479,19 @@ Page({
       hasKBMatch = ragResult.hasMatch || false
       matchQuality = ragResult.matchQuality || ''
       isKBDisabled = ragResult.isDisabled === true
+      retrievalSourceInfo = { activeSources: [], ...(ragResult.sourceInfo || {}) }
+      if (ragResult.graphDebug) {
+        console.log('[Neo4j调试器] 本轮图谱检索:', ragResult.graphDebug)
+      }
       retrievedChunks = this._normalizeChunks(ragResult.chunks || [])
       ragContext = ragResult.context || ''
       if (!this._isGenerationActive(aiMsgId)) return
 
       if (hasKBMatch && retrievedChunks.length > 0) {
+        const activeSources = retrievalSourceInfo.activeSources || []
+        const sourceLabel = activeSources.length === 2
+          ? '双源命中'
+          : activeSources[0] === 'neo4j' ? '仅图谱命中' : '仅知识库命中'
         const isCrossLingual = ragResult.sourceInfo?.crossLingual || retrievedChunks[0].searchMode === 'cross_lingual_vector'
         const qualityLabels = {
           high: '高度相关',
@@ -523,13 +502,17 @@ Page({
         }
         const crossLingualLabel = isCrossLingual ? ' (跨语言)' : ''
         this.setData({
-          retrievalStatus: `${qualityLabels[matchQuality] || ''} · ${retrievedChunks.length} 个知识块${crossLingualLabel}`,
+          retrievalStatus: `${sourceLabel} · ${qualityLabels[matchQuality] || ''} · ${retrievedChunks.length} 条证据${crossLingualLabel}${retrievalSourceInfo.degraded ? '（部分降级）' : ''}`,
           isRetrieving: false
         })
         console.log(`[RAG] ${qualityLabels[matchQuality] || matchQuality}: ${retrievedChunks.length} 个结果`)
       } else {
         this.setData({
-          retrievalStatus: isKBDisabled ? '公共知识库检索已关闭，基于通用知识回答' : '知识库无匹配，基于通用知识回答',
+          retrievalStatus: isKBDisabled
+            ? '公共知识库检索已关闭，基于通用知识回答'
+            : retrievalSourceInfo.degraded
+              ? '部分检索不可用且暂无匹配，基于通用知识回答'
+              : '知识库与图谱均无匹配，基于通用知识回答',
           isRetrieving: false,
           hasKBMatch: false,
           matchQuality: 'no_match'
@@ -538,9 +521,10 @@ Page({
       }
     } catch (ragError) {
       if (!this._isGenerationActive(aiMsgId)) return
+      retrievalSourceInfo = { ...retrievalSourceInfo, degraded: true }
       console.warn('[RAG] 检索异常:', ragError.message)
       this.setData({
-        retrievalStatus: '知识库检索不可用',
+        retrievalStatus: '混合检索不可用',
         isRetrieving: false,
         hasKBMatch: false,
         matchQuality: 'error'
@@ -554,9 +538,11 @@ Page({
       this.setData({
         [`messages[${msgIndex}].content`]: hasKBMatch ? '正在生成回答' : '基于通用知识生成中',
         [`messages[${msgIndex}].retrievedChunks`]: retrievedChunks,
+        [`messages[${msgIndex}].evidenceGraph`]: buildEvidenceGraph(retrievedChunks),
         [`messages[${msgIndex}].chunksExpanded`]: false,
         [`messages[${msgIndex}].hasKBMatch`]: hasKBMatch,
-        [`messages[${msgIndex}].matchQuality`]: matchQuality
+        [`messages[${msgIndex}].matchQuality`]: matchQuality,
+        [`messages[${msgIndex}].retrievalSourceInfo`]: retrievalSourceInfo
       })
     }
 
@@ -564,18 +550,20 @@ Page({
     let systemPromptWithRAG
     if (hasKBMatch && ragContext) {
       const qualityGuide = {
-        high: '以下知识库内容与问题高度相关。请严格基于这些内容回答，引用具体数据和结论时标注[来源N]。如知识库内容有矛盾，请指出并给出最可靠的建议。',
-        medium: '以下知识库内容与问题相关。请重点参考这些内容回答，引用时标注[来源N]。如知识库内容不足以完整回答，可补充专业知识但需明确区分。',
-        low: '以下知识库内容与问题部分相关。请参考并结合专业知识回答，在开头简要说明"知识库中有部分相关内容"。引用知识库内容时标注[来源N]。',
-        very_low: '以下知识库内容与问题关联度较低，仅供有限参考。请主要基于专业知识回答，在开头提示"知识库匹配度较低，以下主要基于专业知识"。',
-        minimal: '以下知识库内容与问题关联度很低。请以专业知识为主回答，在开头说明"知识库中暂无直接匹配内容，以下为基于专业知识的回答"。'
+        high: '以下检索片段匹配度较高，但匹配分数不等于事实已验证或工况适用。核查来源与条件后回答；如证据有矛盾，请明确指出。',
+        medium: '以下检索片段与问题相关。核查来源与适用条件后参考；若不足以完整回答，可补充专业知识但需明确区分。',
+        low: '以下检索证据与问题部分相关。请参考并结合专业知识回答，并说明现有证据只能部分支持结论。',
+        very_low: '以下检索证据关联度较低，仅供有限参考。请主要基于专业知识回答并提示匹配度较低。',
+        minimal: '以下检索证据关联度很低。请以专业知识为主回答，并说明暂无直接匹配证据。'
       }
-      const guide = qualityGuide[matchQuality] || qualityGuide.low
+      const guide = (qualityGuide[matchQuality] || qualityGuide.low) + ' 引用文档时使用[文档N]，引用知识图谱关系时使用[图谱N]，不得混用编号。图谱关系未提供原始来源时只作检索线索，不据此保证因果、参数或工业效果。专家规范约束回答方式，不能作为技术证据。'
       systemPromptWithRAG = this.systemPrompt + '\n\n' + ragContext + '\n\n' + guide
     } else {
       systemPromptWithRAG = this.systemPrompt + '\n\n' + (isKBDisabled
         ? ragRetriever.getRetrievalDisabledPrefix()
-        : ragRetriever.getNoMatchPrefix())
+        : retrievalSourceInfo.degraded
+          ? ragRetriever.getRetrievalUnavailablePrefix()
+          : ragRetriever.getNoMatchPrefix())
     }
 
     // 保留最近 6 轮对话，避免长会话无限膨胀 prompt，导致延迟、成本和截断风险上升。
@@ -656,6 +644,7 @@ Page({
   async _tryRealStream(messageHistory, aiMsgId, retrievedChunks, hasKBMatch, useWebSearch) {
     const self = this
     let _streamTask = null // 通过 onTask 回调捕获，供 onChunk 中 abort
+    let liveReasoning = ''
     try {
       const result = await zhipuAPI.chatStream(messageHistory, {
         model: config.zhipu.model,
@@ -663,6 +652,10 @@ Page({
         maxTokens: 2048,
         thinkingConfig: config.zhipu.thinking,
         onTask: (task) => { _streamTask = task; chatStreamManager.setCloudTask(task) },
+        onReasoning: (chunk, fullReasoning) => {
+          liveReasoning = fullReasoning
+          self._updateReasoningContent(aiMsgId, fullReasoning, true)
+        },
         onChunk: (chunk, fullContent) => {
           if (!self._isGenerationActive(aiMsgId)) {
             try { _streamTask && _streamTask.abort && _streamTask.abort() } catch (e) {}
@@ -684,6 +677,8 @@ Page({
               }
               if (self.data.messages[idx]._thinking) {
                 updates[`messages[${idx}]._thinking`] = false
+                // 正式回答开始输出后自动收起思考框，避免与正文同时抢占视线。
+                updates[`messages[${idx}].reasoningExpanded`] = false
               }
               self.setData(updates)
               if (fullContent.length % 80 < 16) {
@@ -699,6 +694,7 @@ Page({
 
       const recovered = await this._autoContinueResponse(messageHistory, result.content || '', result.finishReason, aiMsgId, useWebSearch)
       const fullResponse = recovered.content || '抱歉，我暂时无法回答这个问题。'
+      const reasoningContent = result.reasoning || liveReasoning
       if (recovered.incomplete) this._pendingWarning = this._incompleteWarning()
 
       // 提取来源（与降级路径一致）
@@ -760,7 +756,8 @@ Page({
         usedWebSearch: capturedUseWebSearch,
         retrievedChunks: capturedChunks,
         hasKBMatch: capturedHasKBMatch,
-        matchQuality: capturedMatchQuality
+        matchQuality: capturedMatchQuality,
+        reasoningContent
       })
 
       return true
@@ -853,6 +850,7 @@ Page({
     this._interruptedStreamContent = ''
     this._interruptedStreamReason = null
     let webSearchInfo = null
+    let reasoningContent = ''
     let lastIsRateLimit = false
     let aborted = false   // 用户主动取消标记
     // P0-3: maxRetries 2 → 1，避免 60s×3=180s 叠加；总耗时上限 60s+1s+60s=121s
@@ -878,6 +876,8 @@ Page({
           ? appendWithoutOverlap(fullResponse, response.content || '')
           : (response.content || '抱歉，我暂时无法回答这个问题。')
         webSearchInfo = response.webSearchInfo || null
+        reasoningContent = response.reasoning || reasoningContent
+        this._updateReasoningContent(aiMsgId, reasoningContent, false)
         // 检测因 max_tokens 截断：提示用户可发送"继续"获取剩余内容
         const recovered = await this._autoContinueResponse(messageHistory, fullResponse, response.finishReason, aiMsgId, useWebSearch)
         fullResponse = recovered.content
@@ -987,6 +987,7 @@ Page({
       const m = this.data.messages.find(x => x.id === aiMsgId)
       return (m && m.matchQuality) || ''
     })()
+    const capturedReasoningContent = reasoningContent
     const self = this
 
     // 清空临时状态（防止下轮对话串数据）
@@ -1015,6 +1016,8 @@ Page({
             }
             if (self.data.messages[idx]._thinking) {
               updates[`messages[${idx}]._thinking`] = false
+              // 云函数降级路径开始模拟输出时也遵循同样的收起行为。
+              updates[`messages[${idx}].reasoningExpanded`] = false
             }
             self.setData(updates)
             // 每隔约 80 字符滚动一次
@@ -1035,7 +1038,8 @@ Page({
           usedWebSearch: capturedUseWebSearch,
           retrievedChunks: capturedChunks,
           hasKBMatch: capturedHasKBMatch,
-          matchQuality: capturedMatchQuality
+          matchQuality: capturedMatchQuality,
+          reasoningContent: capturedReasoningContent
         })
       }
     })
@@ -1044,7 +1048,7 @@ Page({
   // ========== 流式输出完成回调 ==========
   // 由 chatStreamManager 在流式结束时调用，独立于页面生命周期
   // 即使页面被 reLaunch 销毁，本方法仍会执行持久化（conversationManager + 云端）
-  _onStreamFinish({ aiMsgId, sessionId, finalContent, wasCancelled, pendingUserContent, sources, warning, webSearchInfo, usedWebSearch, retrievedChunks, hasKBMatch, matchQuality }) {
+  _onStreamFinish({ aiMsgId, sessionId, finalContent, wasCancelled, pendingUserContent, sources, warning, webSearchInfo, usedWebSearch, retrievedChunks, hasKBMatch, matchQuality, reasoningContent = '' }) {
     if (!this._isGenerationActive(aiMsgId)) return
     const finalSources = sources || this.extractSources(finalContent)
     const finalContentHtml = markdownToHtml(finalContent)
@@ -1065,6 +1069,9 @@ Page({
         warning,
         canContinue: Boolean(warning && warning.title === '回答未完整生成'),
         retrievedChunks: retrievedChunks || [],
+        evidenceGraph: buildEvidenceGraph(retrievedChunks || []),
+        reasoningContent: SHOW_REASONING ? String(reasoningContent || '').substring(0, MAX_REASONING_CHARS) : '',
+        reasoningExpanded: false,
         chunksExpanded: false,
         hasKBMatch,
         matchQuality,
@@ -1097,6 +1104,8 @@ Page({
           [`messages[${msgIndex}].canContinue`]: Boolean(warning && warning.title === '回答未完整生成'),
           [`messages[${msgIndex}].usedWebSearch`]: usedWebSearch,
           [`messages[${msgIndex}].webSearchInfo`]: webSearchInfo,
+          [`messages[${msgIndex}].reasoningContent`]: SHOW_REASONING ? String(reasoningContent || '').substring(0, MAX_REASONING_CHARS) : '',
+          [`messages[${msgIndex}].reasoningExpanded`]: false,
           [`messages[${msgIndex}]._streaming`]: false,
           [`messages[${msgIndex}]._thinking`]: false,  // P1-2: 清除思考状态
           isTyping: false,
@@ -1164,10 +1173,13 @@ Page({
   _enrichMessages(messages) {
     if (!Array.isArray(messages)) return messages
     return messages.map(m => {
+      const evidenceGraph = m && m.type === 'ai' && !m.evidenceGraph
+        ? buildEvidenceGraph(m.retrievedChunks || [])
+        : m && m.evidenceGraph
       if (m && m.type === 'ai' && !m._streaming && !m.contentHtml && m.content) {
-        return { ...m, contentHtml: markdownToHtml(m.content) }
+        return { ...m, contentHtml: markdownToHtml(m.content), evidenceGraph }
       }
-      return m
+      return evidenceGraph ? { ...m, evidenceGraph } : m
     })
   },
 
@@ -1939,10 +1951,35 @@ Page({
     if (!chunks || !Array.isArray(chunks)) return []
     return chunks.map(chunk => ({
       ...chunk,
-      scorePercent: Math.round((chunk.score || 0) * 100),
-      scoreWidth: Math.max(0, Math.min(100, Math.round((chunk.score || 0) * 100))),
+      scorePercent: chunk.sourceType === 'neo4j' ? null : Math.round((chunk.score || 0) * 100),
+      scoreWidth: chunk.sourceType === 'neo4j' ? 0 : Math.max(0, Math.min(100, Math.round((chunk.score || 0) * 100))),
       searchMode: chunk.searchMode === 'cross_lingual_vector' ? 'cross_lingual_vector' : (chunk.searchMode || 'vector')
     }))
+  },
+
+  _updateReasoningContent(aiMsgId, content, expand) {
+    if (!SHOW_REASONING) return
+    const msgIndex = this.data.messages.findIndex(m => m.id === aiMsgId)
+    if (msgIndex < 0 || !content) return
+    const clipped = String(content).substring(0, MAX_REASONING_CHARS)
+    this.setData({
+      [`messages[${msgIndex}].reasoningContent`]: clipped,
+      [`messages[${msgIndex}].reasoningExpanded`]: Boolean(expand)
+    })
+  },
+
+  toggleReasoningExpand(e) {
+    if (!SHOW_REASONING) return
+    const msgId = e.currentTarget.dataset.msgId
+    const msgIndex = this.data.messages.findIndex(m => m.id === msgId)
+    if (msgIndex >= 0) {
+      this.setData({ [`messages[${msgIndex}].reasoningExpanded`]: !this.data.messages[msgIndex].reasoningExpanded })
+    }
+  },
+
+  onEvidenceNodeTap(e) {
+    const name = e.currentTarget.dataset.name
+    if (name) wx.showToast({ title: name, icon: 'none' })
   },
 
   toggleChunksExpand(e) {

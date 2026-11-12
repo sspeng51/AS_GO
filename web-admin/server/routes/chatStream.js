@@ -2,6 +2,7 @@ const express = require('express')
 const https = require('https')
 const rateLimit = require('express-rate-limit')
 const { verifyStreamToken } = require('../utils/streamToken')
+const { applyExpertPolicy } = require('../utils/expertPolicy')
 
 const router = express.Router()
 const usedTokenIds = new Map()
@@ -48,14 +49,15 @@ router.post('/stream', authenticateStreamRequest, streamLimiter, (req, res) => {
   if (promptChars > 50000) {
     return res.status(413).json({ error: '对话上下文过长' })
   }
+  const expertRequest = applyExpertPolicy(messages, { enabled: process.env.EXPERT_POLICY_ENABLED !== 'false' })
 
   const apiKey = process.env.ZHIPU_API_KEY || process.env.BIGMODEL_API_KEY
   if (!apiKey) {
     return res.status(500).json({ error: '服务器未配置 ZHIPU_API_KEY' })
   }
 
-  const defaultModel = process.env.ZHIPU_MODEL || 'glm-5.2'
-  const allowedModels = (process.env.ZHIPU_ALLOWED_MODELS || 'glm-5.2,glm-4.5-flash')
+  const defaultModel = process.env.ZHIPU_MODEL || 'glm-5.3'
+  const allowedModels = (process.env.ZHIPU_ALLOWED_MODELS || 'glm-5.3,glm-5.3-flash,glm-4.7-flashx,glm-4.7-flash')
     .split(',').map(item => item.trim()).filter(Boolean)
   const useModel = model || defaultModel
   if (!allowedModels.includes(useModel)) {
@@ -66,18 +68,20 @@ router.post('/stream', authenticateStreamRequest, streamLimiter, (req, res) => {
   res.setHeader('Cache-Control', 'no-cache')
   res.setHeader('Connection', 'keep-alive')
   res.setHeader('X-Accel-Buffering', 'no')
+  res.setHeader('X-Expert-Policy-Version', expertRequest.metadata.version)
+  res.setHeader('X-Expert-Policy-Status', expertRequest.metadata.status)
   res.flushHeaders()
 
   const requestedMaxTokens = Number(maxTokens) || 2048
   const requestBody = {
     model: useModel,
-    messages,
+    messages: expertRequest.messages,
     temperature: typeof temperature === 'number' ? temperature : 0.7,
     max_tokens: Math.min(Math.max(requestedMaxTokens, 1), 4096),
     stream: true
   }
 
-  const safeThinkingConfig = thinkingConfig || (useModel.startsWith('glm-5') ? { reasoning_effort: 'medium' } : null)
+  const safeThinkingConfig = thinkingConfig || (useModel.startsWith('glm-5.3') ? { reasoning_effort: 'low' } : null)
   if (safeThinkingConfig) {
     if (safeThinkingConfig.enable_thinking === false) {
       requestBody.enable_thinking = false
@@ -111,6 +115,7 @@ router.post('/stream', authenticateStreamRequest, streamLimiter, (req, res) => {
   const startTime = Date.now()
   let chunkCount = 0
   let totalContent = ''
+  let totalReasoning = ''
   let upstreamDone = false
   let clientDisconnected = false
 
@@ -140,13 +145,18 @@ router.post('/stream', authenticateStreamRequest, streamLimiter, (req, res) => {
             upstreamDone = true
             res.write('event: done\ndata: [DONE]\n\n')
             res.end()
-            console.log('[ChatStream] done ' + (Date.now() - startTime) + 'ms ' + chunkCount + ' chunks ' + totalContent.length + ' chars')
+            console.log('[ChatStream] done ' + (Date.now() - startTime) + 'ms ' + chunkCount + ' chunks, answer=' + totalContent.length + ', reasoning=' + totalReasoning.length + ' chars')
             return
           }
           try {
             const parsed = JSON.parse(dataStr)
             const delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta
             const content = (delta && delta.content) || ''
+            const reasoning = (delta && (delta.reasoning_content || delta.reasoning)) || ''
+            if (reasoning) {
+              totalReasoning += reasoning
+              res.write('data: ' + JSON.stringify({ reasoning }) + '\n\n')
+            }
             if (content) {
               totalContent += content
               chunkCount++

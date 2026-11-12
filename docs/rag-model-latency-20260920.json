@@ -1,0 +1,48 @@
+{
+  "at": "2026-09-20T07:48:59.789Z",
+  "experiment": "167fc334-9bc7-4389-ac79-671c8e42921d",
+  "group": "C",
+  "inputChars": 6726,
+  "temperature": 0.1,
+  "maxTokens": 4096,
+  "diagnosticOnly": true,
+  "results": [
+    {
+      "model": "glm-4.7",
+      "success": true,
+      "totalMs": 32202,
+      "firstTokenMs": 10267,
+      "answerChars": 1730,
+      "reasoningChars": 0,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 4708,
+        "completion_tokens": 1195,
+        "total_tokens": 5903,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "model": "glm-5.3-flash",
+      "success": true,
+      "totalMs": 17841,
+      "firstTokenMs": 1696,
+      "answerChars": 1670,
+      "reasoningChars": 0,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 4714,
+        "completion_tokens": 1231,
+        "total_tokens": 5945,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    }
+  ]
+}

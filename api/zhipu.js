@@ -23,7 +23,8 @@ class ZhipuAPI {
    *
    * @param {Array<{role, content}>} messages
    * @param {Object} options
-   *   - {function} onChunk(content, fullContent) 每收到一个增量回调
+   *   - {function} onChunk(content, fullContent) 每收到一个回答增量回调
+   *   - {function} onReasoning(content, fullReasoning) 每收到一个思考增量回调
    *   - {function} onTask(task) 暴露 wx.request task 供外部 abort
    *   - {number} temperature
    *   - {number} maxTokens
@@ -32,7 +33,7 @@ class ZhipuAPI {
    * @returns {Promise<{content, finishReason}>}
    */
   async chatStream(messages, options = {}) {
-    const { onChunk, onTask, temperature, maxTokens, webSearch, thinkingConfig } = options
+    const { onChunk, onReasoning, onTask, temperature, maxTokens, webSearch, thinkingConfig } = options
     const model = options.model || appConfig.zhipu.model
     const streamServerUrl = appConfig.stream.serverUrl
 
@@ -48,6 +49,7 @@ class ZhipuAPI {
 
     return new Promise((resolve, reject) => {
       let fullContent = ''
+      let fullReasoning = ''
       let finishReason = null
       let completed = false
       let settled = false
@@ -87,6 +89,10 @@ class ZhipuAPI {
               fullContent += parsed.content
               onChunk && onChunk(parsed.content, fullContent)
             }
+            if (parsed.reasoning) {
+              fullReasoning += parsed.reasoning
+              onReasoning && onReasoning(parsed.reasoning, fullReasoning)
+            }
           } catch (e) { /* 非业务 JSON 忽略 */ }
         }
       }
@@ -112,7 +118,7 @@ class ZhipuAPI {
           if (res.statusCode !== 200) return fail(`流式服务 HTTP ${res.statusCode}`)
           if (!completed) return fail('STREAM_INCOMPLETE')
           settled = true
-          resolve({ content: fullContent, finishReason, completed: true })
+          resolve({ content: fullContent, reasoning: fullReasoning, finishReason, completed: true })
         },
         fail: (err) => {
           if (err.errMsg && /abort/i.test(err.errMsg)) {
@@ -184,6 +190,7 @@ class ZhipuAPI {
 
         const response = {
           content: result.content || '',
+          reasoning: result.reasoning || '',
           usage: result.usage || {},
           model: result.model || '',
           webSearch: result.webSearch === true,

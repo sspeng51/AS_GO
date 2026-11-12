@@ -16,7 +16,7 @@ router.get('/config', async (req, res) => {
       },
       zhipu: {
         // 模型从环境变量读取，兜底与主配置 config/config.js 保持一致
-        model: process.env.ZHIPU_MODEL || 'glm-5.2',
+        model: process.env.ZHIPU_MODEL || 'glm-5.3',
         embeddingModel: 'embedding-3',
         knowledgeId: process.env.ZHIPU_KNOWLEDGE_ID ? process.env.ZHIPU_KNOWLEDGE_ID.substring(0, 8) + '...' : '未配置',
         apiKeyConfigured: !!process.env.ZHIPU_API_KEY || !!process.env.BIGMODEL_API_KEY

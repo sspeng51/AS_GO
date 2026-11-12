@@ -138,6 +138,20 @@
             <!-- 流式输出 + 输出完成：统一用 rich-text 实时渲染 markdown -->
             <!-- 每帧实时转换 HTML，让用户直接看到最终样式，避免先显示原始符号再突变的割裂感 -->
             <rich-text wx:else class="content-rich" nodes="{{item.contentHtml || item.content}}"></rich-text>
+
+            <view class="reasoning-panel" wx:if="{{showReasoning && item.reasoningContent}}">
+              <view class="reasoning-header" bindtap="toggleReasoningExpand" data-msg-id="{{item.id}}">
+                <view class="reasoning-title-row">
+                  <text class="reasoning-icon">🧠</text>
+                  <text class="reasoning-title">模型思考过程</text>
+                  <text class="reasoning-live" wx:if="{{item._streaming && item._thinking}}">生成中</text>
+                </view>
+                <text class="reasoning-toggle">{{item.reasoningExpanded ? '收起' : '展开'}} {{item.reasoningExpanded ? '⌃' : '⌄'}}</text>
+              </view>
+              <view class="reasoning-body" wx:if="{{item.reasoningExpanded}}">
+                <text>{{item.reasoningContent}}</text>
+              </view>
+            </view>
             
             <!-- RAG检索状态展示区域 -->
             <!-- 有匹配结果时：展示知识块 -->
@@ -145,7 +159,7 @@
               <view class="rag-chunks-header" bindtap="toggleChunksExpand" data-msg-id="{{item.id}}">
                 <view class="rag-chunks-title-row">
                   <text class="rag-chunks-icon">📚</text>
-                  <text class="rag-chunks-title">检索依据 ({{item.retrievedChunks.length}} 个知识块)</text>
+                  <text class="rag-chunks-title">检索依据 ({{item.retrievedChunks.length}} 条证据)</text>
                   <text class="rag-quality-tag {{item.matchQuality}}">{{item.matchQuality === 'high' ? '高相关' : item.matchQuality === 'medium' ? '较相关' : '参考'}}</text>
                   <text class="rag-cross-tag" wx:if="{{item.retrievedChunks[0].searchMode === 'cross_lingual_vector'}}">🌐跨语言</text>
                 </view>
@@ -156,18 +170,51 @@
               
               <view class="rag-chunks-body {{item.chunksExpanded ? 'show' : ''}}">
                 <view class="rag-chunks-meta">
-                  <text class="rag-meta-text">{{item.retrievedChunks[0].searchMode === 'cross_lingual_vector' ? '跨语言向量相似度匹配' : (item.retrievedChunks[0].searchMode === 'vector' ? '向量相似度匹配' : '文本关键词匹配')}}</text>
+                  <text class="rag-meta-text">混合检索证据（按实际命中来源展示）</text>
+                </view>
+                <view class="evidence-graph-panel" wx:if="{{item.evidenceGraph && item.evidenceGraph.edgeCount > 0}}">
+                  <view class="evidence-graph-header">
+                    <view class="evidence-graph-title-row">
+                      <text class="evidence-graph-icon">🕸️</text>
+                      <text class="evidence-graph-title">本次命中知识图谱</text>
+                    </view>
+                    <text class="evidence-graph-count">{{item.evidenceGraph.nodeCount}} 个实体 · {{item.evidenceGraph.edgeCount}} 条关系</text>
+                  </view>
+                  <scroll-view class="evidence-graph-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+                    <view class="evidence-graph-canvas" style="width: {{item.evidenceGraph.width}}rpx; height: {{item.evidenceGraph.height}}rpx;">
+                      <block wx:for="{{item.evidenceGraph.edges}}" wx:for-item="edge" wx:key="id">
+                        <view class="evidence-graph-edge" style="left: {{edge.left}}rpx; top: {{edge.top}}rpx; width: {{edge.width}}rpx; transform: rotate({{edge.angle}}deg);"></view>
+                        <text class="evidence-graph-edge-label" style="left: {{edge.labelLeft}}rpx; top: {{edge.labelTop}}rpx;">{{edge.relation}}</text>
+                      </block>
+                      <block wx:for="{{item.evidenceGraph.nodes}}" wx:for-item="node" wx:key="id">
+                        <view class="evidence-graph-node {{node.isCore ? 'core' : ''}}" style="left: {{node.left}}rpx; top: {{node.top}}rpx;" bindtap="onEvidenceNodeTap" data-name="{{node.label}}">
+                          <text>{{node.label}}</text>
+                        </view>
+                      </block>
+                    </view>
+                  </scroll-view>
+                  <text class="evidence-graph-tip">横向滑动查看完整关系图；点击实体可查看名称</text>
                 </view>
                 <block wx:for="{{item.retrievedChunks}}" wx:for-item="chunk" wx:key="id">
                   <view class="rag-chunk-item" bindtap="onChunkTap" data-chunk="{{chunk}}">
-                    <view class="rag-chunk-top">
-                      <view class="rag-chunk-score">
-                        <text class="score-bar" style="width: {{chunk.scoreWidth}}%;"></text>
-                      </view>
-                      <text class="rag-chunk-percent">{{chunk.scorePercent}}%</text>
+                  <view class="rag-chunk-top">
+                    <text class="rag-source-type zhipu" wx:if="{{chunk.sourceType !== 'neo4j'}}">智谱知识库</text>
+                    <view class="rag-chunk-score" wx:if="{{chunk.sourceType !== 'neo4j'}}">
+                      <text class="score-bar" style="width: {{chunk.scoreWidth}}%;"></text>
+                    </view>
+                      <text class="rag-chunk-percent" wx:if="{{chunk.sourceType !== 'neo4j'}}">{{chunk.scorePercent}}%</text>
+                      <text class="rag-source-type graph" wx:if="{{chunk.sourceType === 'neo4j'}}">知识图谱</text>
                     </view>
                     <text class="rag-chunk-title">{{chunk.title}}</text>
-                    <text class="rag-chunk-snippet">{{chunk.content}}</text>
+                    <view class="graph-relation" wx:if="{{chunk.sourceType === 'neo4j'}}">
+                      <text class="graph-node">{{chunk.nodes[0]}}</text>
+                      <view class="graph-edge">
+                        <text class="graph-edge-label">{{chunk.relation}}</text>
+                        <text class="graph-edge-arrow">→</text>
+                      </view>
+                      <text class="graph-node">{{chunk.nodes[1]}}</text>
+                    </view>
+                    <text class="rag-chunk-snippet" wx:if="{{chunk.sourceType !== 'neo4j'}}">{{chunk.content}}</text>
                     <view class="rag-chunk-source" wx:if="{{chunk.documentId}}">
                       <text class="source-label">来源ID: </text>
                       <text class="source-value">{{chunk.documentId}}</text>

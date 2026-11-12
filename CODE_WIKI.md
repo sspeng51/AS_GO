@@ -1044,9 +1044,9 @@ components/tab-bar/tab-bar.js
 | `REGISTERED_DAILY_LIMIT` / `REGISTERED_PER_MINUTE_LIMIT` | 注册用户每日/每分钟调用上限（默认 100/10） |
 | `STREAM_SHARED_SECRET` | 流式短期令牌签名密钥（与 Web 服务一致，至少 32 位） |
 | `NEO4J_URI` | Neo4j Aura 连接 URI（`neo4j+s://...`） |
-| `NEO4J_USERNAME` | Neo4j 用户名（默认 `neo4j`） |
+| `NEO4J_USERNAME` | Neo4j 用户名（当前实例：`8785b1b2`，必须显式配置） |
 | `NEO4J_PASSWORD` | Neo4j 密码 |
-| `NEO4J_DATABASE` | Neo4j 数据库（默认 `neo4j`） |
+| `NEO4J_DATABASE` | Neo4j 数据库（当前实例：`8785b1b2`，必须显式配置） |
 
 ### 10.2 wechatLogin 云函数
 

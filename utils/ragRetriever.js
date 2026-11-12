@@ -12,10 +12,13 @@
 // RAG 调优配置本地默认值（云函数配置拉取失败时兜底）
 // 与云函数 getDefaultRagConfig 保持一致：仅 zhipu + context 两组
 // P0-4: cloudTimeout 35s → 15s，避免 RAG 拖垮主回答 60s 预算
+const { calculateHybridTimeout } = require('./hybridTimeout')
+
 const DEFAULT_RAG_CONFIG = {
   zhipu: { useZhipuKb: true, topN: 15, cloudTimeout: 15000 },
   retrieval: { recallMethod: 'mixed', recallRatio: 80, rerankStatus: 0 },
-  context: { maxChunks: 4, maxTokens: 2000, minScore: 40, overlap: 200, includeMetadata: true }
+  context: { maxChunks: 10, maxTokens: 2000, minScore: 40, overlap: 200, includeMetadata: true },
+  graph: { enabled: true, hybridTimeout: 85000, plannerTimeout: 12000, queryTimeout: 15000, maxHops: 2, maxFacts: 20, contextMaxTokens: 800, schemaCacheTTL: 600000 }
 }
 
 class RAGRetriever {
@@ -41,7 +44,13 @@ class RAGRetriever {
       })
       const cfg = res.result && res.result.config
       if (cfg && cfg.zhipu && cfg.context) {
-        this._ragConfig = cfg
+        this._ragConfig = {
+          ...DEFAULT_RAG_CONFIG,
+          ...cfg,
+          zhipu: { ...DEFAULT_RAG_CONFIG.zhipu, ...cfg.zhipu },
+          context: { ...DEFAULT_RAG_CONFIG.context, ...cfg.context },
+          graph: { ...DEFAULT_RAG_CONFIG.graph, ...(cfg.graph || {}) }
+        }
       } else {
         this._ragConfig = DEFAULT_RAG_CONFIG
       }
@@ -59,9 +68,9 @@ class RAGRetriever {
     console.log(`[RAG] 检索: "${query.substring(0, 50)}..."`)
 
     try {
-      const result = await this._callZhipuKB(query, topK)
+      const result = await this._callHybridSearch(query, topK)
       if (result.isUnavailable) {
-        console.warn(`[RAG] 智谱检索不可用: ${result.error}`)
+        console.warn(`[RAG] 混合检索不可用: ${result.error}`)
         return result
       }
       const duration = Date.now() - startTime
@@ -74,69 +83,74 @@ class RAGRetriever {
     }
   }
 
-  // 智谱托管知识库检索（公共知识库专用）
-  async _callZhipuKB(query, topK) {
+  // 服务端顺序执行：智谱知识库 → 实体关系规划 → Neo4j → 证据融合
+  async _callHybridSearch(query, topK) {
     const cfg = await this._loadConfig()
-    // 公共知识库目前只有智谱托管这一条检索链路。关闭时明确跳过检索，
-    // 让调用方据此提示“通识回答”，而不是误报为知识库无匹配。
-    if (cfg.zhipu.useZhipuKb === false) {
-      return this._disabledResult()
-    }
+    const clientTimeout = calculateHybridTimeout(cfg)
     return new Promise((resolve) => {
       const timer = setTimeout(() => {
-        console.warn('[RAG] 智谱知识库客户端超时')
-        resolve(this._unavailableResult('智谱知识库检索超时'))
-      }, cfg.zhipu.cloudTimeout)
+        console.warn(`[RAG] 混合检索客户端超时 (${clientTimeout}ms)`)
+        resolve(this._unavailableResult(`混合检索超时 (${clientTimeout}ms)`))
+      }, clientTimeout)
 
       wx.cloud.callFunction({
         name: 'processKnowledge',
         data: {
-          action: 'kb.zhipu.search',
-          data: { query, topK: Math.max(topK, cfg.zhipu.topN), topN: cfg.zhipu.topN }
+          action: 'kb.hybrid.search',
+          data: { query, topK: Math.max(topK, cfg.zhipu.topN) }
         },
         success: async (res) => {
           clearTimeout(timer)
           if (!res.result?.success) {
             // 返回结构化失败，交由 retrieve 直接返回不可用结果
-            resolve(this._unavailableResult(res.result?.error || '智谱知识库无结果'))
+            resolve(this._unavailableResult(res.result?.error || '混合检索失败'))
             return
           }
-          const rawResults = res.result.results || []
-          const searchMode = res.result.searchMode || 'zhipu'
-
+          const rawResults = res.result.evidences || []
+          const graphDebug = res.result.sourceInfo?.neo4j?.debug || null
+          if (graphDebug) {
+            console.log('[RAG][Neo4j调试] 状态:', graphDebug.status)
+            console.log('[RAG][Neo4j调试] 规划模型:', graphDebug.plannerModel || '未完成规划')
+            console.log('[RAG][Neo4j调试] 模型尝试:', graphDebug.plannerAttempts || [])
+            console.log('[RAG][Neo4j调试] 实体:', graphDebug.entities || [])
+            console.log('[RAG][Neo4j调试] 实体类型:', graphDebug.entityTypes || [])
+            console.log('[RAG][Neo4j调试] 关系:', graphDebug.relations || [])
+            console.log('[RAG][Neo4j调试] Cypher:', graphDebug.cypher || '未生成 Cypher')
+            console.log('[RAG][Neo4j调试] Cypher 来源:', graphDebug.cypherSource || '未生成')
+            if (graphDebug.recoveryReason) console.warn('[RAG][Neo4j调试] 查询回退原因:', graphDebug.recoveryReason)
+            console.log('[RAG][Neo4j调试] 参数:', graphDebug.params || {})
+            console.log('[RAG][Neo4j调试] 返回记录/事实:', graphDebug.recordCount || 0, '/', res.result.sourceInfo?.neo4j?.count || 0)
+            if (graphDebug.error) console.warn('[RAG][Neo4j调试] 错误:', graphDebug.error)
+          }
           const chunks = rawResults.map(r => ({
             id: r.id,
             title: r.title || r.documentTitle || '未知文档',
             content: r.content || '',
-            score: (r.score || 0) / 100, // 云函数已统一成 0-100，这里归一化到 0-1
-            source: r.source || '智谱知识库',
+            score: r.sourceType === 'neo4j' ? null : (r.score || 0),
+            source: r.source || (r.sourceType === 'neo4j' ? 'Neo4j 知识图谱' : '智谱知识库'),
+            sourceType: r.sourceType || 'zhipu',
             documentId: r.documentId,
             chunkId: r.chunkId || r._id,
-            searchMode: r.searchMode || searchMode,
+            searchMode: r.searchMode || (r.sourceType === 'neo4j' ? 'neo4j' : 'zhipu'),
             vectorSimilarity: r.vectorSimilarity || 0,
-            textRelevance: r.textRelevance || 0
+            textRelevance: r.textRelevance || 0,
+            nodes: r.nodes || [],
+            relation: r.relation || ''
           }))
-
-          const filtered = await this._adaptiveFilter({ chunks, searchMode })
           resolve({
-            ...filtered,
-            sourceInfo: {
-              searchMode,
-              totalFound: res.result.totalFound || rawResults.length,
-              duration: res.result.duration || 0,
-              coverage: res.result.coverage || {},
-              degraded: Boolean(res.result.degraded),
-              retrievalFallback: res.result.retrievalFallback || null
-            },
-            // 必须尊重阈值过滤结果；不能用“返回了任意片段”覆盖成命中。
-            hasMatch: filtered.hasMatch,
-            matchQuality: filtered.matchQuality
+            chunks,
+            context: res.result.context || '',
+            expertGuidance: res.result.expertGuidance || null,
+            sourceInfo: res.result.sourceInfo || {},
+            graphDebug,
+            hasMatch: Boolean(res.result.hasMatch),
+            matchQuality: res.result.matchQuality || 'no_match'
           })
         },
         fail: (err) => {
           clearTimeout(timer)
           // 不 reject，统一返回不可用结果
-          resolve(this._unavailableResult(err.errMsg || '智谱知识库云函数调用失败'))
+          resolve(this._unavailableResult(err.errMsg || '混合检索云函数调用失败'))
         }
       })
     })
@@ -155,7 +169,7 @@ class RAGRetriever {
     // 0 是合法配置，不能用 || 回退为 30，否则后台设置“不过滤”不会生效。
     const minScore = typeof cfg.context.minScore === 'number' ? cfg.context.minScore : 40
     const threshold = minScore / 100
-    const maxChunks = typeof cfg.context.maxChunks === 'number' ? cfg.context.maxChunks : 4
+    const maxChunks = typeof cfg.context.maxChunks === 'number' ? cfg.context.maxChunks : 10
 
     const passed = chunks.filter(c => c.score >= threshold)
     // 全部低于阈值时应明确判定为无匹配，不能强塞最高分片段污染回答。
@@ -220,7 +234,7 @@ class RAGRetriever {
   _unavailableResult(error) {
     return {
       chunks: [], context: '',
-      sourceInfo: { searchMode: 'zhipu', error },
+      sourceInfo: { searchMode: 'hybrid', error, degraded: true },
       hasMatch: false, matchQuality: 'error',
       isUnavailable: true, error
     }
@@ -236,7 +250,11 @@ class RAGRetriever {
   }
 
   getNoMatchPrefix() {
-    return `【重要】知识库中未检索到与该问题直接相关的内容。请基于你的专业知识回答用户问题，并在回答开头明确说明"知识库中暂无该问题的直接相关内容，以下为基于专业知识的回答"。`
+    return `【重要】知识库与知识图谱中均未检索到与该问题直接相关的内容。请基于专业知识回答，并在开头明确说明“现有知识库与图谱中暂无直接相关证据，以下为基于专业知识的回答”。`
+  }
+
+  getRetrievalUnavailablePrefix() {
+    return '【重要】本轮知识库或图谱检索未能完整完成，且没有可用片段。请明确说明“本轮检索未完整完成，暂无法核实相关证据”，不要声称知识库中不存在资料。仅提供有边界的一般解释，不编造参数、企业事实或合规结论。'
   }
 
   getRetrievalDisabledPrefix() {

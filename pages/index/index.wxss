@@ -1308,6 +1308,120 @@ page {
   color: #94a3b8;
 }
 
+.reasoning-panel {
+  margin: 16rpx 0 4rpx;
+  border: 1rpx solid #d9e6f3;
+  border-radius: 14rpx;
+  overflow: hidden;
+  background: #f8fbff;
+}
+
+.reasoning-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 54rpx;
+  padding: 0 16rpx;
+}
+
+.reasoning-title-row { display: flex; align-items: center; gap: 8rpx; }
+.reasoning-icon { font-size: 24rpx; }
+.reasoning-title { font-size: 21rpx; color: #315d85; font-weight: 600; }
+.reasoning-toggle { font-size: 19rpx; color: #6a8daf; }
+.reasoning-live { padding: 2rpx 8rpx; border-radius: 8rpx; background: #e1f0ff; color: #3577ae; font-size: 17rpx; }
+.reasoning-body { max-height: 420rpx; overflow-y: auto; padding: 14rpx 16rpx 16rpx; border-top: 1rpx solid #e4edf5; color: #587087; font-size: 20rpx; line-height: 1.65; white-space: pre-wrap; word-break: break-all; }
+
+.evidence-graph-panel {
+  margin: 18rpx 20rpx 10rpx;
+  padding: 18rpx 0 12rpx;
+  border: 1rpx solid rgba(46, 125, 50, 0.18);
+  border-radius: 16rpx;
+  background: linear-gradient(145deg, #f5fbf6 0%, #ffffff 70%);
+  overflow: hidden;
+}
+
+.evidence-graph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  padding: 0 18rpx 14rpx;
+}
+
+.evidence-graph-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.evidence-graph-icon { font-size: 27rpx; }
+.evidence-graph-title { font-size: 23rpx; font-weight: 700; color: #1b5e20; }
+.evidence-graph-count { font-size: 19rpx; color: #5f7663; white-space: nowrap; }
+
+.evidence-graph-scroll { width: 100%; height: 490rpx; background: rgba(232, 245, 233, 0.5); }
+.evidence-graph-canvas { position: relative; min-width: 680rpx; min-height: 270rpx; }
+
+.evidence-graph-edge {
+  position: absolute;
+  z-index: 1;
+  height: 3rpx;
+  border-radius: 2rpx;
+  background: linear-gradient(90deg, #7cbf83, #2e7d32);
+  transform-origin: left center;
+}
+
+.evidence-graph-edge::after {
+  content: '';
+  position: absolute;
+  right: -8rpx;
+  top: -5rpx;
+  border-top: 7rpx solid transparent;
+  border-bottom: 7rpx solid transparent;
+  border-left: 10rpx solid #2e7d32;
+}
+
+.evidence-graph-edge-label {
+  position: absolute;
+  z-index: 2;
+  width: 104rpx;
+  padding: 3rpx 5rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2e7d32;
+  font-size: 17rpx;
+  text-align: center;
+  line-height: 1.25;
+  word-break: break-all;
+}
+
+.evidence-graph-node {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  width: 136rpx;
+  min-height: 62rpx;
+  padding: 10rpx 9rpx;
+  border: 2rpx solid #79ae80;
+  border-radius: 15rpx;
+  background: #fff;
+  color: #245d2a;
+  font-size: 20rpx;
+  font-weight: 600;
+  line-height: 1.28;
+  text-align: center;
+  word-break: break-all;
+  box-shadow: 0 4rpx 10rpx rgba(46, 125, 50, 0.1);
+}
+
+.evidence-graph-node.core {
+  border-color: #1976d2;
+  background: #f4f9ff;
+  color: #0d47a1;
+}
+
+.evidence-graph-node:active { transform: scale(0.96); }
+.evidence-graph-tip { display: block; padding: 10rpx 18rpx 0; color: #78907d; font-size: 18rpx; }
+
 /* 单个知识块 */
 .rag-chunk-item {
   padding: 18rpx 24rpx;
@@ -1354,6 +1468,26 @@ page {
   text-align: right;
 }
 
+.rag-source-type.graph {
+  display: inline-block;
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+  background: rgba(76, 175, 80, 0.12);
+  color: #2e7d32;
+  font-size: 22rpx;
+  white-space: nowrap;
+}
+
+.rag-source-type.zhipu {
+  display: inline-block;
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+  background: rgba(10, 61, 98, 0.1);
+  color: #0A3D62;
+  font-size: 22rpx;
+  white-space: nowrap;
+}
+
 .rag-chunk-title {
   display: block;
   font-size: 23rpx;
@@ -1374,6 +1508,49 @@ page {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   word-break: break-all;
+}
+
+.graph-relation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 16rpx 12rpx;
+  border-radius: 12rpx;
+  background: rgba(76, 175, 80, 0.07);
+}
+
+.graph-node {
+  max-width: 220rpx;
+  padding: 8rpx 14rpx;
+  border: 1rpx solid rgba(46, 125, 50, 0.25);
+  border-radius: 12rpx;
+  background: #fff;
+  color: #1b5e20;
+  font-size: 21rpx;
+  font-weight: 600;
+  text-align: center;
+  word-break: break-all;
+}
+
+.graph-edge {
+  min-width: 90rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #2e7d32;
+}
+
+.graph-edge-label {
+  max-width: 180rpx;
+  font-size: 19rpx;
+  text-align: center;
+  word-break: break-all;
+}
+
+.graph-edge-arrow {
+  font-size: 28rpx;
+  line-height: 1;
 }
 
 .rag-chunk-source {

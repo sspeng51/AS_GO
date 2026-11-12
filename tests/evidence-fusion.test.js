@@ -1,0 +1,22 @@
+const { test } = require('node:test')
+const assert = require('node:assert/strict')
+const focused = require('../web-admin/server/utils/focusedEvidence')
+const policy = require('../web-admin/server/utils/expertPolicy')
+test('new evidence protocol isolates fusion instructions and preserves old generation instructions', () => {
+  assert.equal(focused.generationInstruction('focused-evidence-v2', {expert:true,graph:true}), focused.instruction)
+  assert.equal(focused.generationInstruction('legacy', {expert:true,graph:true}), '')
+  const b=focused.generationInstruction(focused.VERSION,{documents:true})
+  const d=focused.generationInstruction(focused.VERSION,{documents:true,expert:true})
+  const e=focused.generationInstruction(focused.VERSION,{documents:true,expert:true,graph:true})
+  assert.ok(!b.includes('图谱与专家规范联合使用：'))
+  assert.ok(!d.includes('图谱与专家规范联合使用：'))
+  assert.ok(e.includes('图谱与专家规范联合使用：'))
+  assert.ok(e.includes('配比对象'))
+})
+test('retrieved domain titles enable expert checks for implicit domain questions without enabling unrelated queries', () => {
+  const q='What first-stage acid-leaching conditions were reported for scrap-copper dust?'
+  assert.equal(policy.retrieveExpertGuidance(q).rules.length,0)
+  assert.ok(policy.retrieveExpertGuidance(q,{domainContext:'Arsenic recovery from scrap copper dust'}).rules.length>0)
+  assert.equal(policy.retrieveExpertGuidance('How to bake bread?',{domainContext:'Cooking recipes'}).rules.length,0)
+  assert.equal(policy.retrieveExpertGuidance(q,{enabled:false,domainContext:'Arsenic recovery'}).rules.length,0)
+})

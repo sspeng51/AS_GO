@@ -20,21 +20,17 @@ module.exports = {
     // ============================================================
     // 【小程序默认模型】云函数部署包有独立配置；测试会校验两者保持一致。
     // 可选值：
-    //   - glm-4.5-flash（推荐,5-10s,质量中等）
-    //   - glm-4.5-air（慢,质量高,可能超时）
-    //   - glm-4.7-flash（混合思考,默认吃满token）
-    //   - glm-5.2（旗舰混合思考，需配合 thinking 配置控制响应时间）
+    //   - glm-5.3（当前主回答模型）
     // 
     // ============================================================
-    // 保持与已部署云函数及流式服务白名单一致；glm-5.3 不在当前项目支持列表内，会被上游以 400 拒绝。
-    model: 'glm-5.2',
+    // 保持与已部署云函数及流式服务白名单一致。
+    model: 'glm-5.3',
     temperature: 0.7,
     maxTokens: 2048,
     // GLM-5.x 混合思考模型专用配置（其他模型自动忽略）
-    // 切换到 glm-5.2 时建议启用，避免默认 max 思考模式导致超时
-    // 思考强度档位：low（最快）< medium < high < max（默认最慢）
-    // 切换 glm-5.2 时推荐配置：{ reasoning_effort: 'high' }  或  { enable_thinking: false }
-    thinking: { reasoning_effort: 'medium' },   // null=不传该参数(模型用默认); 切换 5.2 时改为 { reasoning_effort: 'medium' }
+    // GLM-5.3 建议启用，避免默认 max 思考模式导致超时
+    // GLM-5.3 支持 low / high / max；low 用于控制响应时间。
+    thinking: { reasoning_effort: 'low' },
     embedding: {
       model: 'embedding-3',
       dimensions: 1024,

@@ -20,15 +20,15 @@ const {
 
 // ============ 智谱托管知识库检索（公共知识库走智谱，享受 Rerank + 查询重写） ============
 
-async function handleZhipuKBSearch(data, context) {
-  const { query, topK = 10 } = data || {}
+async function handleZhipuKBSearch(data, context, configSnapshot, knowledgeIdOverride) {
+  const { query, queries, topK = 10 } = data || {}
 
   if (!query || !query.trim()) {
     return { success: false, error: '搜索查询不能为空' }
   }
 
   const apiKey = config.zhipu.apiKey
-  const knowledgeId = config.zhipu.knowledgeId
+  const knowledgeId = knowledgeIdOverride || config.zhipu.knowledgeId
   if (!apiKey) {
     return { success: false, error: '云函数未配置 ZHIPU_API_KEY 或 BIGMODEL_API_KEY 环境变量' }
   }
@@ -46,17 +46,41 @@ async function handleZhipuKBSearch(data, context) {
   const searchStart = Date.now()
 
   try {
-    const zhipuResult = await callZhipuKBRetrieval({
+    const queryList = [...new Set((Array.isArray(queries) ? queries : [cleanQuery])
+      .map(item => String(item || '').trim()).filter(Boolean))].slice(0, 2)
+    const settled = await Promise.allSettled(queryList.map(searchQuery => callZhipuKBRetrieval({
       knowledgeId,
-      query: cleanQuery,
+      query: searchQuery.substring(0, 1000),
       topK: useTopK,
+      ragConfig: configSnapshot,
       apiKey
-    })
-
+    })))
+    const successful = settled
+      .map((item, index) => item.status === 'fulfilled'
+        ? adaptZhipuResultToRagFormat(item.value, 0).results.map(result => ({ ...result, matchedQuery: queryList[index] }))
+        : [])
+      .flat()
+    if (!successful.length && settled.some(item => item.status === 'rejected')) {
+      throw settled.find(item => item.status === 'rejected').reason
+    }
+    const byChunk = new Map()
+    for (const item of successful) {
+      const key = item.id || `${item.documentId || item.title}|${String(item.content || '').slice(0, 160)}`
+      const previous = byChunk.get(key)
+      if (!previous || Number(item.score) > Number(previous.score)) byChunk.set(key, item)
+    }
     const duration = Date.now() - searchStart
-    const adapted = adaptZhipuResultToRagFormat(zhipuResult, duration)
+    const adapted = {
+      success: true,
+      results: [...byChunk.values()].sort((a, b) => Number(b.score) - Number(a.score)).slice(0, useTopK),
+      duration,
+      queryVariants: queryList,
+      degraded: settled.some(item => item.status === 'fulfilled' && item.value.retrievalFallback),
+      retrievalFallbacks: settled.filter(item => item.status === 'fulfilled' && item.value.retrievalFallback).map(item => item.value.retrievalFallback),
+      partialFailure: settled.some(item => item.status === 'rejected')
+    }
 
-    console.log(`[ZhipuKB] 检索完成 ${duration}ms, 召回 ${adapted.results.length} 条, query="${cleanQuery.substring(0, 40)}..."`)
+    console.log(`[ZhipuKB] 双语检索完成 ${duration}ms, ${queryList.length} 个查询, 召回 ${adapted.results.length} 条`)
     return adapted
   } catch (e) {
     const duration = Date.now() - searchStart

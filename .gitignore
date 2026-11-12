@@ -29,4 +29,10 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# 本地工作产物与导出文件（保留在本机，不纳入源码版本）
+outputs/
+work/
+answer_comparison/
+review_output/
+
 # 小程序打包忽略（已在 project.config.json 配置，此处冗余保险）

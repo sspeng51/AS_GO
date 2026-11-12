@@ -13,7 +13,17 @@ function getDefaultRagConfig() {
     // P0-4: cloudTimeout 35s → 15s，避免 RAG 拖垮主回答 60s 预算
     zhipu: { useZhipuKb: true, topN: 15, cloudTimeout: 15000 },
     retrieval: { recallMethod: 'mixed', recallRatio: 80, rerankStatus: 0 },
-    context: { maxChunks: 4, maxTokens: 2000, minScore: 40, overlap: 200, includeMetadata: true }
+    context: { maxChunks: 10, maxTokens: 2000, minScore: 40, overlap: 200, includeMetadata: true },
+    graph: {
+      enabled: true,
+      hybridTimeout: 85000,
+      plannerTimeout: 12000,
+      queryTimeout: 15000,
+      maxHops: 2,
+      maxFacts: 20,
+      contextMaxTokens: 800,
+      schemaCacheTTL: 600000
+    }
   }
 }
 
@@ -35,7 +45,8 @@ async function getRagConfig() {
       _ragConfigCache = {
         zhipu: { ...defaults.zhipu, ...(cfg.zhipu || {}) },
         retrieval: { ...defaults.retrieval, ...(cfg.retrieval || {}) },
-        context: { ...defaults.context, ...(cfg.context || {}) }
+        context: { ...defaults.context, ...(cfg.context || {}) },
+        graph: { ...defaults.graph, ...(cfg.graph || {}) }
       }
       _ragConfigCacheTime = now
       return _ragConfigCache

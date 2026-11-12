@@ -77,6 +77,7 @@ app.use('/api/conversations', conversationRoutes)
 app.use('/api/feedback', feedbackRoutes)
 app.use('/api/wechat', wechatRoutes)
 app.use('/api/rag-config', ragConfigRoutes)
+app.use('/api/rag-tuning', require('./routes/ragTuning'))
 app.use('/api/chat', chatStreamRoutes)
 
 app.get('/api/health', (req, res) => {

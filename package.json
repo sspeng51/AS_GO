@@ -4,7 +4,9 @@
   "description": "",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "node tests/run.js",
+    "test": "node tools/build-expert-policy.js --check && node tests/run.js && node tests/expert-policy.test.js && node --test tests/rag-evaluation.test.js tests/rag-tuning-api.test.js tests/answer-comparison.test.js tests/answer-timeout.test.js tests/model-stream.test.js tests/answer-scoring-v2.test.js tests/answer-judge-schema.test.js tests/partial-reviews.test.js tests/answer-scheduling.test.js tests/factual-evaluation.test.js",
+    "expert:build": "node tools/build-expert-policy.js",
+    "expert:check": "node tools/build-expert-policy.js --check",
     "check": "node tools/check-project.js",
     "check:security": "node tools/check-security.js",
     "deploy:cloud": "node deploy.js",

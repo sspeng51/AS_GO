@@ -11,6 +11,8 @@
  */
 
 const config = require('../config')
+const { normalizeNeo4jParams } = require('../lib/neo4jParams')
+const { normalizeTimeout } = require('../lib/neo4jTimeout')
 
 // ============ Neo4j Driver 懒加载 ============
 
@@ -58,7 +60,8 @@ function _getNeo4jDriver() {
     {
       // 连接池配置（云函数实例复用时减少握手开销）
       maxConnectionPoolSize: 5,
-      connectionAcquisitionTimeout: 15000,
+      connectionAcquisitionTimeout: 5000,
+      connectionTimeout: 5000,
       maxConnectionLifetime: 30 * 60 * 1000  // 30 分钟
     }
   )
@@ -70,17 +73,30 @@ function _getNeo4jDriver() {
 /**
  * 执行 Cypher 查询，返回 records 数组
  */
-async function _runCypher(cypher, params = {}) {
+async function _runCypher(cypher, params = {}, timeout = 15000) {
   const driver = _getNeo4jDriver()
+  const neo4jModule = _getNeo4jDriverModule()
   const database = config.neo4j.database || 'neo4j'
-  const session = driver.session({ database, defaultAccessMode: 'READ' })
+  const driverParams = normalizeNeo4jParams(params, value => neo4jModule.int(value))
+  const timeouts = [normalizeTimeout(timeout)]
 
-  try {
-    const result = await session.run(cypher, params)
-    return result.records || []
-  } finally {
-    await session.close()
+  for (let attempt = 0; attempt < timeouts.length; attempt++) {
+    const session = driver.session({ database, defaultAccessMode: 'READ' })
+    let tx
+    try {
+      tx = await session.beginTransaction({ timeout: timeouts[attempt] })
+      const result = await tx.run(cypher, driverParams)
+      await tx.commit()
+      return result.records || []
+    } catch (error) {
+      if(tx){try{await tx.rollback()}catch{}}
+      throw error
+    } finally {
+      await session.close()
+    }
   }
+
+  return []
 }
 
 /**
@@ -393,5 +409,6 @@ async function handleNeo4jGraphFetch(data, context) {
 }
 
 module.exports = {
-  handleNeo4jGraphFetch
+  handleNeo4jGraphFetch,
+  runReadOnlyCypher: _runCypher
 }
